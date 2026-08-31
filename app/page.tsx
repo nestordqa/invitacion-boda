@@ -1,3 +1,5 @@
+import { createClient } from '@/utils/supabase/server';
+import { cookies } from 'next/headers'
 import { EventDetails } from "@/components/EventDetails";
 import { EnvelopeCover } from "@/components/EnvelopeCover";
 import { Hero } from "@/components/Hero";
@@ -7,7 +9,22 @@ import { RsvpForm } from "@/components/RsvpForm";
 import { Story } from "@/components/Story";
 import { WeddingInfo } from "@/components/WeddingInfo";
 
-export default function Home() {
+type HomeProps = {
+  searchParams: Promise<{ token?: string }>;
+};
+
+export default async function Home({ searchParams }: HomeProps) {
+  const { token } = await searchParams;
+  const cookieStore = await cookies();
+  const supabase = createClient(cookieStore);
+  const { data: guest } = token
+    ? await supabase
+      .from("guests")
+      .select("name, family, passes_number, confirmation, used_passes_confirmed, guest_observation")
+      .eq("invitation_token", token)
+      .maybeSingle()
+    : { data: null };
+
   return (
     <EnvelopeCover>
       <main>
@@ -17,7 +34,7 @@ export default function Home() {
         <Itinerary />
         <WeddingInfo />
         <PhotoAlbum />
-        <RsvpForm />
+        <RsvpForm guest={guest} token={token} />
       </main>
     </EnvelopeCover>
   );
