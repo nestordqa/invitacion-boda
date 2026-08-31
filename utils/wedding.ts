@@ -1,5 +1,7 @@
 export const RSVP_DEADLINE = new Date("2026-09-30T23:59:59-04:00");
 
+export const MAX_CONFIRMED_GUESTS = 130;
+
 export const RSVP_DEADLINE_LABEL = new Intl.DateTimeFormat("es-DO", {
   day: "numeric",
   month: "long",

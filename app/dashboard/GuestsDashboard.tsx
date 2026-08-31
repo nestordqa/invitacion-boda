@@ -2,6 +2,8 @@
 
 import { Check, ChevronLeft, ChevronRight, Copy, Pencil, Plus, Trash2, X } from "lucide-react";
 import { FormEvent, useEffect, useState } from "react";
+import { MAX_CONFIRMED_GUESTS } from "@/utils/wedding";
+import { DashboardNav } from "./DashboardNav";
 
 type Guest = {
   id: number;
@@ -232,6 +234,7 @@ export function GuestsDashboard() {
   return (
     <main className="min-h-screen bg-[#f6f3ec] px-4 py-8 text-[#24332e] sm:px-8 lg:px-12">
       <div className="mx-auto max-w-375">
+        <DashboardNav active="guests" />
         <header className="flex flex-col gap-5 border-b border-[#24332e]/15 pb-7 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <p className="font-serif text-sm uppercase tracking-[0.2em] text-[#a04d34]">Néstor & Valentina</p>
@@ -313,6 +316,7 @@ export function GuestsDashboard() {
             <div className="mt-4 grid grid-cols-3 divide-x divide-[#24332e]/15">
               {[ ["Confirmados", data.summary.confirmedPasses], ["Pendientes", data.summary.pendingPasses], ["Declinados", data.summary.declinedPasses] ].map(([label, value]) => <div key={label as string} className="px-3 first:pl-0 last:pr-0"><p className="text-2xl font-semibold tabular-nums">{value}</p><p className="mt-1 text-xs leading-tight text-[#24332e]/60">{label}</p></div>)}
             </div>
+            <div className="mt-5 border-t border-[#24332e]/15 pt-4"><div className="flex items-baseline justify-between gap-3"><p className="text-sm font-medium">Cupo confirmado</p><p className="text-sm tabular-nums">{data.summary.confirmedPasses} / {MAX_CONFIRMED_GUESTS}</p></div><div className="mt-2 h-2 overflow-hidden bg-[#e8eee8]"><div className={`h-full ${data.summary.confirmedPasses > MAX_CONFIRMED_GUESTS ? "bg-[#a04d34]" : "bg-[#27613b]"}`} style={{ width: `${Math.min((data.summary.confirmedPasses / MAX_CONFIRMED_GUESTS) * 100, 100)}%` }} /></div><p className={`mt-2 text-xs ${data.summary.confirmedPasses > MAX_CONFIRMED_GUESTS ? "text-[#a04d34]" : "text-[#24332e]/60"}`}>{data.summary.confirmedPasses > MAX_CONFIRMED_GUESTS ? `Se excedió el cupo por ${data.summary.confirmedPasses - MAX_CONFIRMED_GUESTS} invitados.` : `Quedan ${MAX_CONFIRMED_GUESTS - data.summary.confirmedPasses} cupos disponibles.`}</p></div>
           </div>
         </section>
       </div>
