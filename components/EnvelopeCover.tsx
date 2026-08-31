@@ -38,20 +38,21 @@ export function EnvelopeCover({ children }: EnvelopeCoverProps) {
         transition={{ opacity: { duration: 0.45 } }}
         aria-hidden={isOpen}
       >
-        <div className="absolute inset-0 scale-110 bg-[url('/letter/letter.jpg?v=2')] bg-cover bg-center opacity-30 blur-2xl md:opacity-45" />
+        <div className="absolute inset-0 scale-110 bg-[url('/letter/letter.jpg?v=2')] bg-cover bg-center opacity-60 blur-2xl saturate-125" />
+        <div className="absolute inset-0 bg-[#21140f]/30" />
         <motion.div
-          className="absolute inset-0 flex items-center justify-center"
+          className="absolute inset-0 md:flex md:items-center md:justify-center"
           animate={{ scale: isOpening ? 1.12 : 1, y: isOpening ? -18 : 0 }}
           transition={{ duration: 1.05, ease: [0.22, 0.8, 0.2, 1] }}
         >
-          <div className="relative aspect-[704/1520] h-[min(100svh,calc(100vw*2.1591))] shadow-2xl">
+          <div className="relative h-[100svh] w-[100vw] md:aspect-[704/1520] md:h-[100svh] md:w-auto md:max-w-full md:shadow-2xl">
             <Image
               src="/letter/letter.jpg?v=2"
               alt="Sobre de invitación de boda de Néstor y Valentina"
               fill
               priority
               sizes="(max-width: 767px) 100vw, 47vh"
-              className="object-contain"
+              className="object-cover object-center md:object-contain"
             />
             <motion.button
               type="button"
