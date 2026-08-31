@@ -13,11 +13,17 @@ export function MusicPlayer({ className = "" }: MusicPlayerProps) {
   const [wasPausedByGuest, setWasPausedByGuest] = useState(false);
 
   useEffect(() => {
-    const audio = audioRef.current;
+    const timer = window.setTimeout(() => {
+      const audio = audioRef.current;
 
-    if (audio) {
-      void audio.play();
-    }
+      if (audio) {
+        void audio.play().catch(() => {
+          setIsPlaying(false);
+        });
+      }
+    }, 1_500);
+
+    return () => window.clearTimeout(timer);
   }, []);
 
   async function toggleMusic() {

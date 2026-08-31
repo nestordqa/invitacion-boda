@@ -73,6 +73,17 @@ export function EnvelopeCover({ children }: EnvelopeCoverProps) {
           animate={{ opacity: isOpening ? [0, 0.16, 0] : 0 }}
           transition={{ duration: 0.8, times: [0, 0.2, 1] }}
         />
+        <div className="pointer-events-none absolute right-8 top-11 z-[55] w-44 -translate-x-0.5 text-right text-[#fff2dc] sm:right-12 sm:top-14">
+          <svg viewBox="0 0 130 72" className="ml-auto h-13 w-28 stroke-[#fff2dc] stroke-[1.7] drop-shadow-md" fill="none" aria-hidden="true">
+            <path d="M8 66C20 38 43 26 72 25C92 24 105 16 116 5" />
+            <path d="M104 8L116 5L113 17" />
+          </svg>
+          <p className="mt-1 font-serif text-sm font-semibold leading-4 drop-shadow-md">
+            Activa la música
+            <br />
+            y vive cada momento
+          </p>
+        </div>
         <div className="absolute inset-x-4 bottom-5 z-[60] mx-auto w-fit sm:bottom-7">
           <EnvelopeCountdown />
         </div>
