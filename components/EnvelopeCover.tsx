@@ -73,11 +73,11 @@ export function EnvelopeCover({ children }: EnvelopeCoverProps) {
           animate={{ opacity: isOpening ? [0, 0.16, 0] : 0 }}
           transition={{ duration: 0.8, times: [0, 0.2, 1] }}
         />
-        <MusicPlayer className="right-4 top-4 z-[60] bottom-auto sm:right-6 sm:top-6" />
         <div className="absolute inset-x-4 bottom-5 z-[60] mx-auto w-fit sm:bottom-7">
           <EnvelopeCountdown />
         </div>
       </motion.div>
+      <MusicPlayer className="right-4 top-4 z-[60] bottom-auto sm:right-6 sm:top-6" />
       {children}
     </>
   );

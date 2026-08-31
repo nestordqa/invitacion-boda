@@ -1,7 +1,7 @@
 "use client";
 
-import { Music, Pause } from "lucide-react";
-import { useRef, useState } from "react";
+import { Music2 } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 
 type MusicPlayerProps = {
   className?: string;
@@ -10,6 +10,15 @@ type MusicPlayerProps = {
 export function MusicPlayer({ className = "" }: MusicPlayerProps) {
   const audioRef = useRef<HTMLAudioElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [wasPausedByGuest, setWasPausedByGuest] = useState(false);
+
+  useEffect(() => {
+    const audio = audioRef.current;
+
+    if (audio) {
+      void audio.play();
+    }
+  }, []);
 
   async function toggleMusic() {
     const audio = audioRef.current;
@@ -19,14 +28,14 @@ export function MusicPlayer({ className = "" }: MusicPlayerProps) {
     }
 
     if (isPlaying) {
+      setWasPausedByGuest(true);
       audio.pause();
-      setIsPlaying(false);
       return;
     }
 
     try {
       await audio.play();
-      setIsPlaying(true);
+      setWasPausedByGuest(false);
     } catch {
       setIsPlaying(false);
     }
@@ -36,18 +45,29 @@ export function MusicPlayer({ className = "" }: MusicPlayerProps) {
     <>
       <audio
         ref={audioRef}
-        src="/music.mp3"
+        src="/up-theme.mp3"
         loop
-        preload="none"
+        autoPlay
+        preload="auto"
+        onPlay={() => setIsPlaying(true)}
         onPause={() => setIsPlaying(false)}
       />
       <button
         type="button"
         onClick={toggleMusic}
         aria-label={isPlaying ? "Pausar música" : "Reproducir música"}
-        className={`fixed bottom-5 right-5 z-20 flex size-10 items-center justify-center rounded-full border border-[#f8d78c]/80 bg-[#8d1012]/95 text-[#f8d78c] shadow-[0_3px_8px_rgb(34_8_5_/_0.3)] transition-transform hover:scale-105 ${className}`}
+        className={`fixed bottom-5 right-5 z-20 flex size-9 items-center justify-center rounded-full border border-[#fff2dc]/75 bg-transparent text-[#fff2dc] transition-colors hover:bg-[#fff2dc]/15 focus:outline-none focus:ring-2 focus:ring-[#fff2dc]/70 ${className}`}
       >
-        {isPlaying ? <Pause className="size-3.5" /> : <Music className="size-3.5" />}
+        {isPlaying ? (
+          <Music2 className="size-3.5" />
+        ) : wasPausedByGuest ? (
+          <span className="relative flex size-3.5 items-center justify-center">
+            <Music2 className="size-3.5" />
+            <span className="absolute h-px w-4 rotate-45 bg-[#fff2dc]" />
+          </span>
+        ) : (
+          <Music2 className="size-3.5" />
+        )}
       </button>
     </>
   );
