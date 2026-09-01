@@ -7,6 +7,9 @@ const nextConfig: NextConfig = {
         pathname: "/letter/**",
         search: "?v=2",
       },
+      {
+        pathname: "/v2/**",
+      },
     ],
   },
 };

@@ -53,3 +53,43 @@ body {
     linear-gradient(90deg, rgb(0 0 0 / 0.28), transparent 25%, rgb(255 204 138 / 0.06) 52%, transparent 75%, rgb(0 0 0 / 0.25)),
     repeating-linear-gradient(176deg, #27140e 0, #392016 3px, #4e2d20 5px, #24120d 9px, #432619 13px);
 }
+
+/* Metallic gold foil effect for the V2 design system */
+.gold-foil-text {
+  background-image: linear-gradient(115deg, #8a6a22 0%, #d4af37 22%, #f7e7a6 45%, #d4af37 68%, #8a6a22 100%);
+  background-size: 200% auto;
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
+.gold-foil-rule {
+  height: 1px;
+  background-image: linear-gradient(90deg, transparent, #8a6a22 15%, #f7e7a6 50%, #8a6a22 85%, transparent);
+}
+
+.gold-foil-frame {
+  background-image: linear-gradient(135deg, #8a6a22, #f7e7a6 35%, #d4af37 60%, #8a6a22);
+  padding: 1.5px;
+  box-shadow: 0 1px 4px rgb(138 106 34 / 0.25);
+}
+
+@keyframes sparkle-pulse {
+  0%, 100% { opacity: 0.55; transform: scale(0.82); }
+  50% { opacity: 1; transform: scale(1.15); }
+}
+
+.sparkle-pulse {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: sparkle-pulse 1.8s ease-in-out infinite;
+}
+
+@keyframes music-btn-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgb(212 175 55 / 0.45); }
+  50% { box-shadow: 0 0 0 9px rgb(212 175 55 / 0); }
+}
+
+.music-btn-pulse {
+  animation: music-btn-pulse 2.2s ease-in-out infinite;
+}

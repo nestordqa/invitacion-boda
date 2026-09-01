@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Cormorant_Garamond, Great_Vibes, Montserrat } from "next/font/google";
+import { Cormorant_Garamond, Great_Vibes, Montserrat, Pinyon_Script } from "next/font/google";
 import "./globals.css";
 
 const montserrat = Montserrat({
@@ -19,6 +19,12 @@ const greatVibes = Great_Vibes({
   weight: "400",
 });
 
+const pinyonScript = Pinyon_Script({
+  variable: "--font-pinyon",
+  subsets: ["latin"],
+  weight: "400",
+});
+
 export const metadata: Metadata = {
   title: "Néstor & Valentina | Nuestra boda",
   description: "Invitación de boda de Néstor y Valentina",
@@ -28,7 +34,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="es"
-      className={`${montserrat.variable} ${cormorant.variable} ${greatVibes.variable} h-full antialiased`}
+      className={`${montserrat.variable} ${cormorant.variable} ${greatVibes.variable} ${pinyonScript.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">{children}</body>
     </html>

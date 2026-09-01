@@ -70,7 +70,7 @@ export async function POST(request: NextRequest) {
   }
 
   const invitationToken = crypto.randomUUID();
-  const invitationUrl = new URL(`/?token=${invitationToken}`, request.url).toString();
+  const invitationUrl = new URL(`/v2?token=${invitationToken}`, request.url).toString();
   const supabase = createClient(await cookies());
   const { data, error } = await supabase
     .from("guests")
