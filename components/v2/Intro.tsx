@@ -20,6 +20,14 @@ export function Intro({ guest, showCta, onNavigateNext }: IntroProps) {
     <section className="relative flex h-svh items-center justify-center overflow-hidden bg-[#21140f]">
       <Image
         src="/letter/letter-2.jpg?v=2"
+        alt=""
+        fill
+        sizes="100vw"
+        className="scale-110 object-cover blur-2xl"
+        aria-hidden="true"
+      />
+      <Image
+        src="/letter/letter-2.jpg?v=2"
         alt="Sobre de invitación de boda de Néstor y Valentina"
         fill
         priority
