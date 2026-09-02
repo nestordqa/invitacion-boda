@@ -14,7 +14,7 @@ type NextChapterProps = {
 
 // Placeholder de la sección que irá antes de la historia; solo el título con el invitado está definido.
 export function NextChapter({ guest, onEnterInvitation }: NextChapterProps) {
-  const title = guest ? (guest.family ? `Flia. ${guest.name}` : guest.name) : "Bienvenido";
+  const title = guest ? (guest.family ? `${guest.name} y Flia.` : guest.name) : "Bienvenido";
 
   return (
     <section

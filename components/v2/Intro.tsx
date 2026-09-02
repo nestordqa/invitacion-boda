@@ -2,7 +2,6 @@
 
 import Image from "next/image";
 import { AnimatePresence, motion } from "framer-motion";
-import { CornerArrow } from "./decor/CornerArrow";
 
 type IntroProps = {
   guest: {
@@ -15,7 +14,7 @@ type IntroProps = {
 
 // The letter cover stays gated until the guest starts the soundtrack.
 export function Intro({ guest, showCta, onNavigateNext }: IntroProps) {
-  const guestName = guest ? (guest.family ? `Flia. ${guest.name}` : guest.name) : "Bienvenido";
+  const guestName = guest ? (guest.family ? `${guest.name} y Flia.` : guest.name) : "Bienvenido";
 
   return (
     <section className="relative flex h-svh items-center justify-center overflow-hidden bg-[#21140f]">
