@@ -343,6 +343,32 @@ export function GuestsDashboard() {
           </form>
         </div>
       )}
+      {guestDetails && (
+        <div role="dialog" aria-modal="true" aria-labelledby="guest-details-title" className="fixed inset-0 z-50 grid place-items-center bg-[#18231f]/55 p-4">
+          <div className="w-full max-w-lg bg-[#fdfcf8] p-6 shadow-2xl sm:p-8">
+            <div className="flex items-start justify-between gap-4 border-b border-[#24332e]/15 pb-5">
+              <div>
+                <p className="text-xs uppercase tracking-[0.14em] text-[#a04d34]">Información adicional</p>
+                <h2 id="guest-details-title" className="mt-1 font-serif text-3xl">{guestDetails.name}</h2>
+              </div>
+              <button type="button" onClick={() => setGuestDetails(null)} aria-label="Cerrar detalles" className="inline-flex size-9 items-center justify-center border border-[#24332e]/20"><X className="size-4" /></button>
+            </div>
+            <div className="mt-6 space-y-5 text-sm">
+              <div>
+                <p className="font-semibold">Observación invitado:</p>
+                <p className="mt-2 whitespace-pre-wrap text-[#24332e]/75">{guestDetails.guest_observation || "Sin observación."}</p>
+              </div>
+              <div>
+                <p className="font-semibold">Nota interna:</p>
+                <p className="mt-2 whitespace-pre-wrap text-[#24332e]/75">{guestDetails.internal_observation || "Sin nota interna."}</p>
+              </div>
+            </div>
+            <div className="mt-7 flex justify-end border-t border-[#24332e]/15 pt-5">
+              <button type="button" onClick={() => setGuestDetails(null)} className="min-h-11 bg-[#24332e] px-5 text-sm font-medium text-white">Cerrar</button>
+            </div>
+          </div>
+        </div>
+      )}
       {guestToDelete && <div role="dialog" aria-modal="true" aria-labelledby="delete-modal-title" className="fixed inset-0 z-50 grid place-items-center bg-[#18231f]/55 p-4"><div className="w-full max-w-md bg-[#fdfcf8] p-6 shadow-2xl"><p className="text-xs uppercase tracking-[0.14em] text-[#a04d34]">Acción irreversible</p><h2 id="delete-modal-title" className="mt-1 font-serif text-3xl">¿Eliminar invitado?</h2><p className="mt-4 text-sm text-[#24332e]/70">Se eliminará permanentemente a <strong>{guestToDelete.name}</strong> y su URL de invitación dejará de funcionar.</p><div className="mt-7 flex justify-end gap-3"><button onClick={() => setGuestToDelete(null)} disabled={isSubmitting} className="min-h-11 px-4 text-sm">Cancelar</button><button onClick={() => void deleteGuest()} disabled={isSubmitting} className="min-h-11 bg-[#a04d34] px-5 text-sm font-medium text-white disabled:opacity-50">{isSubmitting ? "Eliminando..." : "Sí, eliminar"}</button></div></div></div>}
     </main>
   );
