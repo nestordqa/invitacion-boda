@@ -1,4 +1,5 @@
 import { createClient } from "@/utils/supabase/server";
+import { formatGuestName } from "@/utils/wedding";
 import { cookies } from "next/headers";
 import { NextRequest } from "next/server";
 
@@ -8,7 +9,7 @@ export async function PATCH(request: NextRequest, context: RouteContext<"/api/da
   const { id } = await context.params;
   const guestId = Number(id);
   const body = await request.json();
-  const name = typeof body.name === "string" ? body.name.trim() : "";
+  const name = typeof body.name === "string" ? formatGuestName(body.name) : "";
   const passesNumber = Number(body.passes_number);
   const usedPasses = Number(body.used_passes_confirmed);
 

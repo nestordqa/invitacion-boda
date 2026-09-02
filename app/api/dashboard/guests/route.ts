@@ -1,4 +1,5 @@
 import { createClient } from "@/utils/supabase/server";
+import { formatGuestName } from "@/utils/wedding";
 import { cookies } from "next/headers";
 import { NextRequest } from "next/server";
 
@@ -62,16 +63,31 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   const body = await request.json();
-  const name = typeof body.name === "string" ? body.name.trim() : "";
+  const name = typeof body.name === "string" ? formatGuestName(body.name) : "";
   const passesNumber = Number(body.passes_number);
 
   if (!name || !Number.isInteger(passesNumber) || passesNumber < 1) {
     return Response.json({ error: "Ingresa un nombre y una cantidad válida de pases." }, { status: 400 });
   }
 
+  const supabase = createClient(await cookies());
+  const { data: existingGuest, error: duplicateCheckError } = await supabase
+    .from("guests")
+    .select("id")
+    .ilike("name", name)
+    .limit(1)
+    .maybeSingle();
+
+  if (duplicateCheckError) {
+    return Response.json({ error: duplicateCheckError.message }, { status: 500 });
+  }
+
+  if (existingGuest) {
+    return Response.json({ error: "Ya existe un invitado con ese nombre." }, { status: 409 });
+  }
+
   const invitationToken = crypto.randomUUID();
   const invitationUrl = new URL(`/v2?token=${invitationToken}`, request.url).toString();
-  const supabase = createClient(await cookies());
   const { data, error } = await supabase
     .from("guests")
     .insert({

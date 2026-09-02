@@ -9,3 +9,10 @@ export const RSVP_DEADLINE_LABEL = new Intl.DateTimeFormat("es-DO", {
 }).format(RSVP_DEADLINE);
 
 export const isRsvpOpen = () => new Date() <= RSVP_DEADLINE;
+
+export function formatGuestName(value: string) {
+  return value
+    .replace(/(^|\s)(\p{L})/gu, (_match, whitespace: string, letter: string) => (
+      `${whitespace}${letter.toLocaleUpperCase("es")}`
+    ));
+}

@@ -2,7 +2,7 @@
 
 import { Check, ChevronLeft, ChevronRight, Copy, Pencil, Plus, Trash2, X } from "lucide-react";
 import { FormEvent, useEffect, useState } from "react";
-import { MAX_CONFIRMED_GUESTS } from "@/utils/wedding";
+import { formatGuestName, MAX_CONFIRMED_GUESTS } from "@/utils/wedding";
 import { DashboardNav } from "./DashboardNav";
 
 type Guest = {
@@ -81,6 +81,7 @@ export function GuestsDashboard() {
   const [pageSize, setPageSize] = useState(() => typeof window !== "undefined" && window.matchMedia("(max-width: 767px)").matches ? 5 : 20);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const [formError, setFormError] = useState("");
 
   async function loadGuests(page: number, appliedFilters = filters, appliedPageSize = pageSize) {
     setIsLoading(true);
@@ -124,11 +125,14 @@ export function GuestsDashboard() {
     event.preventDefault();
     setIsSubmitting(true);
     setError("");
+    setFormError("");
+    const formattedForm = { ...form, name: formatGuestName(form.name) };
+    setForm(formattedForm);
     try {
       const response = await fetch(editingGuest ? `/api/dashboard/guests/${editingGuest.id}` : "/api/dashboard/guests", {
         method: editingGuest ? "PATCH" : "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify(formattedForm),
       });
       const result = await response.json();
       if (!response.ok) throw new Error(result.error || "No se pudo guardar el invitado.");
@@ -137,7 +141,7 @@ export function GuestsDashboard() {
       setForm(initialForm);
       await loadGuests(1);
     } catch (submitError) {
-      setError(submitError instanceof Error ? submitError.message : "No se pudo guardar el invitado.");
+      setFormError(submitError instanceof Error ? submitError.message : "No se pudo guardar el invitado.");
     } finally {
       setIsSubmitting(false);
     }
@@ -151,11 +155,13 @@ export function GuestsDashboard() {
   function openCreateModal() {
     setEditingGuest(null);
     setForm(initialForm);
+    setFormError("");
     setIsModalOpen(true);
   }
 
   function openEditModal(guest: Guest) {
     setEditingGuest(guest);
+    setFormError("");
     setForm({
       name: guest.name,
       passes_number: guest.passes_number,
@@ -246,7 +252,7 @@ export function GuestsDashboard() {
           </button>
         </header>
 
-        {error && <p className="mt-5 border border-[#a04d34]/35 bg-[#fce9df] px-4 py-3 text-sm text-[#822f20]">{error}</p>}
+        {error && !isModalOpen && <p className="mt-5 border border-[#a04d34]/35 bg-[#fce9df] px-4 py-3 text-sm text-[#822f20]">{error}</p>}
 
         <section className="mt-6 border border-[#24332e]/15 bg-white p-4 sm:p-5">
           <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-[minmax(14rem,1fr)_minmax(22rem,1fr)_auto_auto_auto] xl:items-end">
@@ -329,7 +335,7 @@ export function GuestsDashboard() {
               <button type="button" onClick={() => { setIsModalOpen(false); setEditingGuest(null); }} aria-label="Cerrar modal" className="inline-flex size-9 items-center justify-center border border-[#24332e]/20"><X className="size-4" /></button>
             </div>
             <div className="mt-6 grid gap-5 sm:grid-cols-2">
-              <label className="sm:col-span-2 text-sm font-medium">Nombre completo<input required value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} className="mt-2 min-h-11 w-full border border-[#24332e]/25 bg-white px-3 outline-none focus:border-[#a04d34]" /></label>
+              <label className="sm:col-span-2 text-sm font-medium">Nombre completo<input required value={form.name} onChange={(event) => { setForm({ ...form, name: formatGuestName(event.target.value) }); setFormError(""); }} className="mt-2 min-h-11 w-full border border-[#24332e]/25 bg-white px-3 outline-none focus:border-[#a04d34]" />{formError && <span role="alert" className="mt-2 block text-sm font-normal text-[#822f20]">{formError}</span>}</label>
               <label className="text-sm font-medium">Cantidad de pases<input required min="1" step="1" type="number" value={form.passes_number} onChange={(event) => setForm({ ...form, passes_number: Number(event.target.value) })} className="mt-2 min-h-11 w-full border border-[#24332e]/25 bg-white px-3 outline-none focus:border-[#a04d34]" /></label>
               {editingGuest ? <><label className="text-sm font-medium">Estado<select value={form.confirmation} onChange={(event) => setForm({ ...form, confirmation: event.target.value as Guest["confirmation"] })} className="mt-2 min-h-11 w-full border border-[#24332e]/25 bg-white px-3 outline-none focus:border-[#a04d34]"><option value="pending">Pendiente</option><option value="confirmed">Confirmado</option><option value="declined">Declinó</option></select></label><label className="text-sm font-medium">Pases confirmados<input required min="0" max={form.passes_number} step="1" type="number" value={form.used_passes_confirmed} onChange={(event) => setForm({ ...form, used_passes_confirmed: Number(event.target.value) })} className="mt-2 min-h-11 w-full border border-[#24332e]/25 bg-white px-3 outline-none focus:border-[#a04d34]" /></label></> : <p className="self-end pb-3 text-sm text-[#24332e]/60">Estado inicial: <strong>Pendiente</strong></p>}
               <label className="flex min-h-11 items-center gap-3 border border-[#24332e]/15 px-3 text-sm"><input type="checkbox" checked={form.family} onChange={(event) => setForm({ ...form, family: event.target.checked })} className="size-4 accent-[#a04d34]" />¿Es una familia?</label>
