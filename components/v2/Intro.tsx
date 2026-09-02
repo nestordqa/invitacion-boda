@@ -17,15 +17,14 @@ export function Intro({ guest, showCta, onNavigateNext }: IntroProps) {
   const guestName = guest ? (guest.family ? `Flia. ${guest.name}` : guest.name) : "Bienvenido";
 
   return (
-    <section className="relative flex min-h-svh items-center justify-center overflow-hidden bg-[#21140f]">
+    <section className="relative flex h-svh items-center justify-center overflow-hidden bg-[#21140f]">
       <Image
         src="/letter/letter.jpg?v=2"
         alt="Sobre de invitación de boda de Néstor y Valentina"
+        fill
         priority
-        width={704}
-        height={1520}
-        sizes="100vw"
-        className="absolute inset-0 h-full w-full object-contain object-center"
+        sizes="(max-width: 767px) 100vw, 47vh"
+        className="object-cover object-center md:object-contain"
       />
       <div className="absolute inset-0 bg-[#21140f]/20" />
       <p className="pointer-events-none absolute left-1/2 top-[63%] z-10 w-[min(80%,20rem)] -translate-x-1/2 text-center text-[#553b16] font-(family-name:--font-pinyon) text-3xl font-medium tracking-[0.12em] sm:text-xl">
