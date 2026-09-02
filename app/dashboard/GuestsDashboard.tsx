@@ -75,6 +75,7 @@ export function GuestsDashboard() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [form, setForm] = useState(initialForm);
   const [editingGuest, setEditingGuest] = useState<Guest | null>(null);
+  const [guestDetails, setGuestDetails] = useState<Guest | null>(null);
   const [guestToDelete, setGuestToDelete] = useState<Guest | null>(null);
   const [updatingInvitationId, setUpdatingInvitationId] = useState<number | null>(null);
   const [filters, setFilters] = useState<GuestFilters>(initialFilters);
@@ -272,29 +273,24 @@ export function GuestsDashboard() {
             {isLoading ? <p className="px-4 py-12 text-center text-sm text-[#24332e]/60">Cargando invitados...</p> : data.guests.length === 0 ? <p className="px-4 py-12 text-center text-sm text-[#24332e]/60">Aún no hay invitados registrados.</p> : data.guests.map((guest) => <article key={guest.id} className="p-4"><div className="flex items-start justify-between gap-3"><div><h2 className="font-serif text-xl font-medium">{guest.name}</h2><p className="mt-1 text-xs text-[#24332e]/60">{guest.used_passes_confirmed} de {guest.passes_number} pases confirmados</p></div><span className={`shrink-0 px-2 py-1 text-xs ${guest.confirmation === "confirmed" ? "bg-[#dfece0] text-[#27613b]" : guest.confirmation === "declined" ? "bg-[#f6dfd8] text-[#8d3024]" : "bg-[#f3e8ca] text-[#765913]"}`}>{statusLabels[guest.confirmation]}</span></div><dl className="mt-4 grid grid-cols-2 gap-x-4 gap-y-3 text-sm"><div><dt className="text-xs uppercase tracking-[0.08em] text-[#24332e]/55">Vínculo</dt><dd className="mt-1">{guest.groom_family ? "Familia novio" : guest.bride_family ? "Familia novia" : guest.friend ? "Amigo/a" : "Sin definir"}</dd></div><div><dt className="text-xs uppercase tracking-[0.08em] text-[#24332e]/55">Es una familia</dt><dd className="mt-1">{guest.family ? "Sí" : "No"}</dd></div>{guest.guest_observation && <div className="col-span-2"><dt className="text-xs uppercase tracking-[0.08em] text-[#24332e]/55">Observación</dt><dd className="mt-1 text-[#24332e]/75">{guest.guest_observation}</dd></div>}</dl><div className="mt-4 flex items-center justify-between gap-3 border-t border-[#24332e]/10 pt-3"><label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={guest.invitation_sent} disabled={updatingInvitationId === guest.id} onChange={(event) => void updateInvitationSent(guest, event.target.checked)} className="size-4 accent-[#27613b]" />Enviada</label><div className="flex gap-2"><button onClick={() => void copyUrl(guest.invitation_url)} title="Copiar URL de invitación" className="inline-flex size-9 items-center justify-center border border-[#24332e]/20"><Copy className="size-4" /></button><button onClick={() => openEditModal(guest)} title="Editar invitado" className="inline-flex size-9 items-center justify-center border border-[#24332e]/20"><Pencil className="size-4" /></button><button onClick={() => setGuestToDelete(guest)} title="Eliminar invitado" className="inline-flex size-9 items-center justify-center border border-[#a04d34]/35 text-[#a04d34]"><Trash2 className="size-4" /></button></div></div></article>)}
           </div>
           <div className="hidden overflow-x-auto md:block">
-            <table className="w-full min-w-330 border-collapse text-left text-sm">
+            <table className="w-full min-w-280 border-collapse text-left text-sm">
               <thead className="bg-[#e8eee8] text-xs uppercase tracking-[0.08em] text-[#24332e]/70">
-                <tr>{["Invitado", "¿Es una familia?", "F. novio", "F. novia", "Amigo/a", "Estado", "Pases", "Observación del invitado", "Nota interna", "URL", "Enviada", "Acciones"].map((label) => <th key={label} className="whitespace-nowrap px-4 py-4 font-semibold">{label}</th>)}</tr>
+                <tr>{["Invitado", "¿Es una familia?", "Estado", "Pases", "URL", "Enviada", "Acciones"].map((label) => <th key={label} className="whitespace-nowrap px-4 py-4 font-semibold">{label}</th>)}</tr>
               </thead>
               <tbody className="divide-y divide-[#24332e]/10">
                 {isLoading ? (
-                  <tr><td colSpan={12} className="px-4 py-12 text-center text-[#24332e]/60">Cargando invitados...</td></tr>
+                  <tr><td colSpan={7} className="px-4 py-12 text-center text-[#24332e]/60">Cargando invitados...</td></tr>
                 ) : data.guests.length === 0 ? (
-                  <tr><td colSpan={12} className="px-4 py-12 text-center text-[#24332e]/60">Aún no hay invitados registrados.</td></tr>
+                  <tr><td colSpan={7} className="px-4 py-12 text-center text-[#24332e]/60">Aún no hay invitados registrados.</td></tr>
                 ) : data.guests.map((guest) => (
                   <tr key={guest.id} className="align-top hover:bg-[#f6f3ec]/70">
                     <td className="min-w-64 px-4 py-4 font-medium">{guest.name}</td>
                     <td className="px-4 py-4">{guest.family ? <Check className="size-4 text-[#27613b]" /> : <span className="text-[#24332e]/45">-</span>}</td>
-                    <td className="px-4 py-4">{guest.groom_family ? <Check className="size-4 text-[#27613b]" /> : <span className="text-[#24332e]/45">-</span>}</td>
-                    <td className="px-4 py-4">{guest.bride_family ? <Check className="size-4 text-[#27613b]" /> : <span className="text-[#24332e]/45">-</span>}</td>
-                    <td className="px-4 py-4">{guest.friend ? <Check className="size-4 text-[#27613b]" /> : <span className="text-[#24332e]/45">-</span>}</td>
                     <td className="px-4 py-4"><span className={`inline-block px-2 py-1 text-xs ${guest.confirmation === "confirmed" ? "bg-[#dfece0] text-[#27613b]" : guest.confirmation === "declined" ? "bg-[#f6dfd8] text-[#8d3024]" : "bg-[#f3e8ca] text-[#765913]"}`}>{statusLabels[guest.confirmation]}</span></td>
                     <td className="px-4 py-4 whitespace-nowrap">{guest.used_passes_confirmed} / {guest.passes_number}</td>
-                    <td className="max-w-52 px-4 py-4 text-[#24332e]/70">{guest.guest_observation || "-"}</td>
-                    <td className="max-w-52 px-4 py-4 text-[#24332e]/70">{guest.internal_observation || "-"}</td>
                     <td className="max-w-96 px-4 py-4"><div className="flex items-center gap-2"><a href={guest.invitation_url || undefined} target="_blank" rel="noreferrer" className="truncate text-[#a04d34] underline underline-offset-2">{guest.invitation_url || "-"}</a><button onClick={() => void copyUrl(guest.invitation_url)} disabled={!guest.invitation_url} title="Copiar URL de invitación" className="inline-flex size-8 shrink-0 items-center justify-center border border-[#24332e]/20 hover:bg-[#e8eee8] disabled:opacity-35"><Copy className="size-3.5" /></button></div></td>
                     <td className="px-4 py-4"><input type="checkbox" checked={guest.invitation_sent} disabled={updatingInvitationId === guest.id} onChange={(event) => void updateInvitationSent(guest, event.target.checked)} aria-label={`Invitación enviada a ${guest.name}`} className="size-4 cursor-pointer accent-[#27613b] disabled:cursor-wait" /></td>
-                    <td className="px-4 py-4"><div className="flex gap-2"><button onClick={() => openEditModal(guest)} title="Editar invitado" className="inline-flex size-8 items-center justify-center border border-[#24332e]/20 hover:bg-[#e8eee8]"><Pencil className="size-3.5" /></button><button onClick={() => setGuestToDelete(guest)} title="Eliminar invitado" className="inline-flex size-8 items-center justify-center border border-[#a04d34]/35 text-[#a04d34] hover:bg-[#fce9df]"><Trash2 className="size-3.5" /></button></div></td>
+                    <td className="px-4 py-4"><div className="flex gap-2">{(guest.guest_observation || guest.internal_observation) && <button onClick={() => setGuestDetails(guest)} className="min-h-8 border border-[#24332e]/20 px-3 text-xs hover:bg-[#e8eee8]">Ver más</button>}<button onClick={() => openEditModal(guest)} title="Editar invitado" className="inline-flex size-8 items-center justify-center border border-[#24332e]/20 hover:bg-[#e8eee8]"><Pencil className="size-3.5" /></button><button onClick={() => setGuestToDelete(guest)} title="Eliminar invitado" className="inline-flex size-8 items-center justify-center border border-[#a04d34]/35 text-[#a04d34] hover:bg-[#fce9df]"><Trash2 className="size-3.5" /></button></div></td>
                   </tr>
                 ))}
               </tbody>
@@ -319,8 +315,8 @@ export function GuestsDashboard() {
           </div>
           <div className="border border-[#24332e]/15 bg-white p-5">
             <h2 className="font-serif text-2xl">Estado de confirmación</h2>
-            <div className="mt-4 grid grid-cols-3 divide-x divide-[#24332e]/15">
-              {[ ["Confirmados", data.summary.confirmedPasses], ["Pendientes", data.summary.pendingPasses], ["Declinados", data.summary.declinedPasses] ].map(([label, value]) => <div key={label as string} className="px-3 first:pl-0 last:pr-0"><p className="text-2xl font-semibold tabular-nums">{value}</p><p className="mt-1 text-xs leading-tight text-[#24332e]/60">{label}</p></div>)}
+            <div className="mt-4 grid grid-cols-2 divide-x divide-y divide-[#24332e]/15 sm:grid-cols-4 sm:divide-y-0">
+              {[ ["Invitaciones", data.total], ["Confirmados", data.summary.confirmedPasses], ["Pendientes", data.summary.pendingPasses], ["Declinados", data.summary.declinedPasses] ].map(([label, value]) => <div key={label as string} className="px-3 py-2 first:pl-0 sm:py-0 last:pr-0"><p className="text-2xl font-semibold tabular-nums">{value}</p><p className="mt-1 text-xs leading-tight text-[#24332e]/60">{label}</p></div>)}
             </div>
             <div className="mt-5 border-t border-[#24332e]/15 pt-4"><div className="flex items-baseline justify-between gap-3"><p className="text-sm font-medium">Cupo confirmado</p><p className="text-sm tabular-nums">{data.summary.confirmedPasses} / {MAX_CONFIRMED_GUESTS}</p></div><div className="mt-2 h-2 overflow-hidden bg-[#e8eee8]"><div className={`h-full ${data.summary.confirmedPasses > MAX_CONFIRMED_GUESTS ? "bg-[#a04d34]" : "bg-[#27613b]"}`} style={{ width: `${Math.min((data.summary.confirmedPasses / MAX_CONFIRMED_GUESTS) * 100, 100)}%` }} /></div><p className={`mt-2 text-xs ${data.summary.confirmedPasses > MAX_CONFIRMED_GUESTS ? "text-[#a04d34]" : "text-[#24332e]/60"}`}>{data.summary.confirmedPasses > MAX_CONFIRMED_GUESTS ? `Se excedió el cupo por ${data.summary.confirmedPasses - MAX_CONFIRMED_GUESTS} invitados.` : `Quedan ${MAX_CONFIRMED_GUESTS - data.summary.confirmedPasses} cupos disponibles.`}</p></div>
           </div>

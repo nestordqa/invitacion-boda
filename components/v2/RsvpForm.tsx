@@ -77,7 +77,7 @@ export function RsvpForm({ guest, token }: RsvpFormProps) {
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="mt-10 space-y-6 border-t border-[#D4AF37]/40 pt-8">
-            <p className="border-b border-[#D4AF37]/40 pb-4 text-center font-(family-name:--font-montserrat) text-xl text-[#333333]">{guest.family ? `${guest.name} y Flia.` : `${guest.name}`}</p>
+            <p className="border-b border-[#D4AF37]/40 pb-4 text-center font-(family-name:--font-montserrat) text-xl text-[#333333]">{guest.family ? `Flia. ${guest.name}` : guest.name}</p>
             {isPreviouslyAnswered && <p className="border border-[#D4AF37]/40 px-4 py-3 text-center text-sm text-[#333333]">Ya confirmaste o indicaste que no asistirás. Podrás cambiar de opinión hasta el {RSVP_DEADLINE_LABEL}.</p>}
             {!rsvpOpen && <p className="border border-[#D4AF37]/40 px-4 py-3 text-center text-sm text-[#333333]">El plazo de confirmación finalizó el {RSVP_DEADLINE_LABEL}.</p>}
 

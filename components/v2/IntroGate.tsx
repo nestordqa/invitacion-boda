@@ -52,7 +52,7 @@ export function IntroGate({ guest }: IntroGateProps) {
     <>
       <audio
         ref={audioRef}
-        src="/v2/sountrack.mp3"
+        src="/up-theme.mp3"
         loop
         preload="auto"
         onPlay={() => setIsPlaying(true)}
