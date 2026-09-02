@@ -3,7 +3,6 @@
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { SparkleArrow } from "./decor/SparkleArrow";
-import { useMemo } from "react";
 
 type NextChapterProps = {
   guest: {
@@ -16,28 +15,6 @@ type NextChapterProps = {
 // Placeholder de la sección que irá antes de la historia; solo el título con el invitado está definido.
 export function NextChapter({ guest, onEnterInvitation }: NextChapterProps) {
   const title = guest ? (guest.family ? `Flia. ${guest.name}` : guest.name) : "Bienvenido";
-
-  const isFamily = guest?.family ? true : false;
-
-  const customText = useMemo(() => {
-    if (isFamily) {
-      return {
-        you: "ustedes son unas de esas personas",
-        thanks: "Les agradecemos",
-        youBold: "ustedes",
-        asA: "Como familia, son un ejemplo a seguir para nosotros y un pilar fundamental en nuestras vidas.",
-        contar: "¡Contar con ustedes hoy lo hace perfecto!",
-      };
-    }
-
-    return {
-      you: "tú eres una de esas personas",
-      thanks: "Te agradecemos",
-      youBold: "tú",
-      asA: "Como amigo, has sido un apoyo incondicional tanto en las buenas como en las malas.",
-      contar: "¡Contar contigo hoy lo hace perfecto!",
-    };
-  }, [isFamily]);
 
   return (
     <section
@@ -58,11 +35,10 @@ export function NextChapter({ guest, onEnterInvitation }: NextChapterProps) {
           {title}
         </h2>
         <p className="max-w-sm font-(family-name:--font-montserrat) text-sm leading-6 text-[#FDFBF7]/85">
-          Hay personas que dejan una huella <b>imborrable</b> en nuestra historia, y <b>{customText.you}</b>.<br></br>
-          {customText.asA}<br /><br />
+          Hay personas que dejan una huella <b>imborrable</b> en nuestra historia, y <b>tú eres una de esas personas</b>.<br></br>
           Gracias por haber sido parte fundamental del camino que nos trajo hasta aquí y por seguir caminando a nuestro lado en este nuevo capítulo.<br></br><br></br>
-          {customText.thanks} de corazón por cada consejo, cada abrazo y por estar presente en nuestros mejores momentos.<br></br><br></br>
-          <b>{customText.contar}</b>
+          Te agradecemos de corazón por cada consejo, cada abrazo y por estar presente en nuestros mejores momentos.<br></br><br></br>
+          <b>¡Contar contigo hoy lo hace perfecto!</b>
         </p>
         <motion.button
           type="button"
