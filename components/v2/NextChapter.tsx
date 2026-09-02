@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { SparkleArrow } from "./decor/SparkleArrow";
+import { useMemo } from "react";
 
 type NextChapterProps = {
   guest: {
@@ -16,6 +17,28 @@ type NextChapterProps = {
 export function NextChapter({ guest, onEnterInvitation }: NextChapterProps) {
   const title = guest ? (guest.family ? `Flia. ${guest.name}` : guest.name) : "Bienvenido";
 
+  const isFamily = guest?.family ? true : false;
+
+  const customText = useMemo(() => {
+    if (isFamily) {
+      return {
+        you: "ustedes son unas de esas personas",
+        thanks: "Les agradecemos",
+        youBold: "ustedes",
+        asA: "Como familia, son un ejemplo a seguir para nosotros y un pilar fundamental en nuestras vidas.",
+        contar: "¡Contar con ustedes hoy lo hace perfecto!",
+      };
+    }
+
+    return {
+      you: "tú eres una de esas personas",
+      thanks: "Te agradecemos",
+      youBold: "tú",
+      asA: "Como amigo, has sido un apoyo incondicional tanto en las buenas como en las malas.",
+      contar: "¡Contar contigo hoy lo hace perfecto!",
+    };
+  }, [isFamily]);
+
   return (
     <section
       id="next-chapter"
@@ -28,16 +51,18 @@ export function NextChapter({ guest, onEnterInvitation }: NextChapterProps) {
         sizes="100vw"
         className="object-cover"
       />
-      <div className="absolute inset-0 bg-[#21140f]/45" />
-      <div className="relative flex flex-col items-center gap-5 mt-12">
-        <h2 className="font-(family-name:--font-pinyon) text-5xl text-[#FDFBF7] sm:text-6xl">
+      <div className="absolute inset-0 bg-[#21140f]/55" />
+      <div className="pointer-events-none absolute inset-x-0 top-16 bottom-16 bg-[radial-gradient(ellipse_at_center,rgba(33,20,15,0.48)_0%,rgba(33,20,15,0.3)_48%,transparent_78%)]" />
+      <div className="relative mt-12 flex flex-col items-center gap-5 drop-shadow-[0_2px_4px_rgba(0,0,0,0.45)]">
+        <h2 className="font-(family-name:--font-pinyon) text-5xl gold-foil-text sm:text-6xl">
           {title}
         </h2>
         <p className="max-w-sm font-(family-name:--font-montserrat) text-sm leading-6 text-[#FDFBF7]/85">
-          Hay personas que dejan una huella <b>imborrable</b> en nuestra historia, y <b>tú</b> eres una de ellas. 
+          Hay personas que dejan una huella <b>imborrable</b> en nuestra historia, y <b>{customText.you}</b>.<br></br>
+          {customText.asA}<br /><br />
           Gracias por haber sido parte fundamental del camino que nos trajo hasta aquí y por seguir caminando a nuestro lado en este nuevo capítulo.<br></br><br></br>
-          Queremos agradecerte de corazón por cada consejo, cada abrazo y por estar presente en nuestros mejores momentos.<br></br><br></br>
-          <b>¡Contar contigo hoy lo hace perfecto!</b>
+          {customText.thanks} de corazón por cada consejo, cada abrazo y por estar presente en nuestros mejores momentos.<br></br><br></br>
+          <b>{customText.contar}</b>
         </p>
         <motion.button
           type="button"

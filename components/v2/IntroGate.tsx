@@ -71,7 +71,7 @@ export function IntroGate({ guest }: IntroGateProps) {
                 exit={{ opacity: 0, scale: 0.97, transition: { duration: 0.5, ease: "easeIn" } }}
                 transition={{ duration: 0.6, ease: "easeOut" }}
               >
-                <Intro showCta={isPlaying} onNavigateNext={() => setStage("next")} />
+                <Intro guest={guest} showCta={isPlaying} onNavigateNext={() => setStage("next")} />
               </motion.div>
             ) : (
               <motion.div

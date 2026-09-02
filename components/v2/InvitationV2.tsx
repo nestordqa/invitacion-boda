@@ -22,7 +22,7 @@ export function InvitationV2({ guest, token }: InvitationV2Props) {
   return (
     <main className="bg-[#FDFBF7]">
       <IntroGate guest={guest} />
-      <Story />
+      {/* <Story /> */}
       <EventDetails />
       <Itinerary />
       <WeddingInfo />
