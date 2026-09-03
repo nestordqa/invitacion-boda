@@ -226,8 +226,15 @@ export function BudgetDashboard() {
       const result = await response.json();
       if (!response.ok)
         throw new Error(result.error || "No se pudo guardar la compra.");
+      const savedItem = {
+        ...(result.item as BudgetItem),
+        categories: { name: category.name },
+      };
+      setItems((current) => editingItem
+        ? current.map((item) => item.id === savedItem.id ? savedItem : item)
+        : [savedItem, ...current],
+      );
       setIsItemModalOpen(false);
-      await loadData();
     } catch (saveError) {
       setError(
         saveError instanceof Error
@@ -288,7 +295,7 @@ export function BudgetDashboard() {
         throw new Error(result.error || "No se pudo eliminar la compra.");
       }
       setItemToDelete(null);
-      await loadData();
+      setItems((current) => current.filter((item) => item.id !== itemToDelete.id));
     } catch (deleteError) {
       setError(
         deleteError instanceof Error

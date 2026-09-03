@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
 
   const guestsQuery = supabase
     .from("guests")
-    .select("id, family, name, groom_family, bride_family, friend, confirmation, passes_number, used_passes_confirmed, guest_observation, internal_observation, invitation_token, invitation_url, invitation_sent, created_at", { count: "exact" })
+    .select("id, family, name, groom_family, bride_family, friend, confirmation, passes_number, used_passes_confirmed, guest_observation, internal_observation, invitation_token, invitation_url, invitation_sent, unlikely_to_attend, created_at", { count: "exact" })
     .order("created_at", { ascending: false })
     .range(start, start + pageSize - 1);
   const { data, error, count } = await applyFilters(guestsQuery, { relationships, status, sent, search });
@@ -39,7 +39,7 @@ export async function GET(request: NextRequest) {
 
   const summaryQuery = supabase
     .from("guests")
-    .select("groom_family, bride_family, friend, confirmation, passes_number, used_passes_confirmed");
+    .select("groom_family, bride_family, friend, confirmation, passes_number, used_passes_confirmed, unlikely_to_attend");
   const { data: summaryRows, error: summaryError } = await applyFilters(summaryQuery, { relationships, status, sent, search });
 
   if (summaryError) {
@@ -49,6 +49,10 @@ export async function GET(request: NextRequest) {
   const summary = (summaryRows ?? []).reduce((totals, guest) => {
     const confirmedPasses = guest.confirmation === "confirmed" ? guest.used_passes_confirmed : 0;
     totals.totalPasses += guest.passes_number;
+    if (guest.unlikely_to_attend) {
+      totals.unlikelyGuests += 1;
+      totals.unlikelyPasses += guest.passes_number;
+    }
     if (guest.groom_family) totals.groomFamilyPasses += guest.passes_number;
     if (guest.bride_family) totals.brideFamilyPasses += guest.passes_number;
     if (guest.friend) totals.friendPasses += guest.passes_number;
@@ -56,7 +60,7 @@ export async function GET(request: NextRequest) {
     if (guest.confirmation === "pending") totals.pendingPasses += guest.passes_number;
     if (guest.confirmation === "declined") totals.declinedPasses += guest.passes_number;
     return totals;
-  }, { totalPasses: 0, groomFamilyPasses: 0, brideFamilyPasses: 0, friendPasses: 0, confirmedPasses: 0, pendingPasses: 0, declinedPasses: 0 });
+  }, { totalPasses: 0, groomFamilyPasses: 0, brideFamilyPasses: 0, friendPasses: 0, confirmedPasses: 0, pendingPasses: 0, declinedPasses: 0, unlikelyGuests: 0, unlikelyPasses: 0 });
 
   return Response.json({ guests: data, page, pageSize, total: count ?? 0, summary });
 }
@@ -100,6 +104,7 @@ export async function POST(request: NextRequest) {
       passes_number: passesNumber,
       used_passes_confirmed: 0,
       internal_observation: typeof body.internal_observation === "string" ? body.internal_observation.trim() || null : null,
+      unlikely_to_attend: Boolean(body.unlikely_to_attend),
       invitation_token: invitationToken,
       invitation_url: invitationUrl,
       invitation_sent: false,

@@ -19,6 +19,7 @@ type Guest = {
   internal_observation: string | null;
   invitation_url: string | null;
   invitation_sent: boolean;
+  unlikely_to_attend: boolean;
 };
 
 type GuestSummary = {
@@ -29,6 +30,8 @@ type GuestSummary = {
   confirmedPasses: number;
   pendingPasses: number;
   declinedPasses: number;
+  unlikelyGuests: number;
+  unlikelyPasses: number;
 };
 
 type GuestsResponse = { guests: Guest[]; page: number; pageSize: number; total: number; summary: GuestSummary; error?: string };
@@ -51,6 +54,7 @@ type GuestForm = {
   bride_family: boolean;
   friend: boolean;
   internal_observation: string;
+  unlikely_to_attend: boolean;
 };
 
 const initialForm: GuestForm = {
@@ -64,13 +68,30 @@ const initialForm: GuestForm = {
   bride_family: false,
   friend: false,
   internal_observation: "",
+  unlikely_to_attend: false,
 };
 
 const statusLabels = { pending: "Pendiente", confirmed: "Confirmado", declined: "Declinó" };
 const initialFilters: GuestFilters = { relationships: [], status: "", sent: "", search: "" };
 
+function updateSummary(summary: GuestSummary, guest: Guest, direction: 1 | -1) {
+  const confirmedPasses = guest.confirmation === "confirmed" ? guest.used_passes_confirmed : 0;
+  return {
+    ...summary,
+    totalPasses: summary.totalPasses + direction * guest.passes_number,
+    groomFamilyPasses: summary.groomFamilyPasses + (guest.groom_family ? direction * guest.passes_number : 0),
+    brideFamilyPasses: summary.brideFamilyPasses + (guest.bride_family ? direction * guest.passes_number : 0),
+    friendPasses: summary.friendPasses + (guest.friend ? direction * guest.passes_number : 0),
+    confirmedPasses: summary.confirmedPasses + direction * confirmedPasses,
+    pendingPasses: summary.pendingPasses + (guest.confirmation === "pending" ? direction * guest.passes_number : 0),
+    declinedPasses: summary.declinedPasses + (guest.confirmation === "declined" ? direction * guest.passes_number : 0),
+    unlikelyGuests: summary.unlikelyGuests + (guest.unlikely_to_attend ? direction : 0),
+    unlikelyPasses: summary.unlikelyPasses + (guest.unlikely_to_attend ? direction * guest.passes_number : 0),
+  };
+}
+
 export function GuestsDashboard() {
-  const [data, setData] = useState<GuestsResponse>({ guests: [], page: 1, pageSize: 10, total: 0, summary: { totalPasses: 0, groomFamilyPasses: 0, brideFamilyPasses: 0, friendPasses: 0, confirmedPasses: 0, pendingPasses: 0, declinedPasses: 0 } });
+  const [data, setData] = useState<GuestsResponse>({ guests: [], page: 1, pageSize: 10, total: 0, summary: { totalPasses: 0, groomFamilyPasses: 0, brideFamilyPasses: 0, friendPasses: 0, confirmedPasses: 0, pendingPasses: 0, declinedPasses: 0, unlikelyGuests: 0, unlikelyPasses: 0 } });
   const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [form, setForm] = useState(initialForm);
@@ -78,6 +99,7 @@ export function GuestsDashboard() {
   const [guestDetails, setGuestDetails] = useState<Guest | null>(null);
   const [guestToDelete, setGuestToDelete] = useState<Guest | null>(null);
   const [updatingInvitationId, setUpdatingInvitationId] = useState<number | null>(null);
+  const [updatingAttendanceId, setUpdatingAttendanceId] = useState<number | null>(null);
   const [filters, setFilters] = useState<GuestFilters>(initialFilters);
   const [pageSize, setPageSize] = useState(() => typeof window !== "undefined" && window.matchMedia("(max-width: 767px)").matches ? 5 : 20);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -137,10 +159,19 @@ export function GuestsDashboard() {
       });
       const result = await response.json();
       if (!response.ok) throw new Error(result.error || "No se pudo guardar el invitado.");
+      const savedGuest = result.guest as Guest;
+      setData((current) => {
+        const guests = editingGuest
+          ? current.guests.map((guest) => guest.id === savedGuest.id ? savedGuest : guest)
+          : [savedGuest, ...current.guests].slice(0, current.pageSize);
+        const summary = editingGuest
+          ? updateSummary(updateSummary(current.summary, editingGuest, -1), savedGuest, 1)
+          : updateSummary(current.summary, savedGuest, 1);
+        return { ...current, guests, total: editingGuest ? current.total : current.total + 1, summary };
+      });
       setIsModalOpen(false);
       setEditingGuest(null);
       setForm(initialForm);
-      await loadGuests(1);
     } catch (submitError) {
       setFormError(submitError instanceof Error ? submitError.message : "No se pudo guardar el invitado.");
     } finally {
@@ -174,6 +205,7 @@ export function GuestsDashboard() {
       bride_family: guest.bride_family,
       friend: guest.friend,
       internal_observation: guest.internal_observation || "",
+      unlikely_to_attend: guest.unlikely_to_attend,
     });
     setIsModalOpen(true);
   }
@@ -189,7 +221,12 @@ export function GuestsDashboard() {
         throw new Error(result.error || "No se pudo eliminar el invitado.");
       }
       setGuestToDelete(null);
-      await loadGuests(data.guests.length === 1 && data.page > 1 ? data.page - 1 : data.page);
+      setData((current) => ({
+        ...current,
+        guests: current.guests.filter((guest) => guest.id !== guestToDelete.id),
+        total: Math.max(0, current.total - 1),
+        summary: updateSummary(current.summary, guestToDelete, -1),
+      }));
     } catch (deleteError) {
       setError(deleteError instanceof Error ? deleteError.message : "No se pudo eliminar el invitado.");
     } finally {
@@ -225,6 +262,36 @@ export function GuestsDashboard() {
     }
   }
 
+  async function updateUnlikelyToAttend(guest: Guest, unlikelyToAttend: boolean) {
+    setUpdatingAttendanceId(guest.id);
+    setError("");
+    setData((current) => ({
+      ...current,
+      guests: current.guests.map((currentGuest) => currentGuest.id === guest.id ? { ...currentGuest, unlikely_to_attend: unlikelyToAttend } : currentGuest),
+      summary: updateSummary(updateSummary(current.summary, guest, -1), { ...guest, unlikely_to_attend: unlikelyToAttend }, 1),
+    }));
+    try {
+      const response = await fetch(`/api/dashboard/guests/${guest.id}/unlikely-to-attend`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ unlikely_to_attend: unlikelyToAttend }),
+      });
+      if (!response.ok) {
+        const result = await response.json();
+        throw new Error(result.error || "No se pudo actualizar la asistencia.");
+      }
+    } catch (updateError) {
+      setData((current) => ({
+        ...current,
+        guests: current.guests.map((currentGuest) => currentGuest.id === guest.id ? { ...currentGuest, unlikely_to_attend: guest.unlikely_to_attend } : currentGuest),
+        summary: updateSummary(updateSummary(current.summary, { ...guest, unlikely_to_attend: unlikelyToAttend }, -1), guest, 1),
+      }));
+      setError(updateError instanceof Error ? updateError.message : "No se pudo actualizar la asistencia.");
+    } finally {
+      setUpdatingAttendanceId(null);
+    }
+  }
+
   const totalPages = Math.max(1, Math.ceil(data.total / data.pageSize));
   const hasGuestChanges = !editingGuest ||
     form.name !== editingGuest.name ||
@@ -236,7 +303,8 @@ export function GuestsDashboard() {
     form.groom_family !== editingGuest.groom_family ||
     form.bride_family !== editingGuest.bride_family ||
     form.friend !== editingGuest.friend ||
-    form.internal_observation !== (editingGuest.internal_observation || "");
+    form.internal_observation !== (editingGuest.internal_observation || "") ||
+    form.unlikely_to_attend !== editingGuest.unlikely_to_attend;
 
   return (
     <main className="min-h-screen bg-[#f6f3ec] px-4 py-8 text-[#24332e] sm:px-8 lg:px-12">
@@ -275,19 +343,20 @@ export function GuestsDashboard() {
           <div className="hidden overflow-x-auto md:block">
             <table className="w-full min-w-280 border-collapse text-left text-sm">
               <thead className="bg-[#e8eee8] text-xs uppercase tracking-[0.08em] text-[#24332e]/70">
-                <tr>{["Invitado", "¿Es una familia?", "Estado", "Pases", "URL", "Enviada", "Acciones"].map((label) => <th key={label} className="whitespace-nowrap px-4 py-4 font-semibold">{label}</th>)}</tr>
+                <tr>{["Invitado", "¿Es una familia?", "Estado", "Pases", "No asiste", "URL", "Enviada", "Acciones"].map((label) => <th key={label} className="whitespace-nowrap px-4 py-4 font-semibold">{label}</th>)}</tr>
               </thead>
               <tbody className="divide-y divide-[#24332e]/10">
                 {isLoading ? (
-                  <tr><td colSpan={7} className="px-4 py-12 text-center text-[#24332e]/60">Cargando invitados...</td></tr>
+                  <tr><td colSpan={8} className="px-4 py-12 text-center text-[#24332e]/60">Cargando invitados...</td></tr>
                 ) : data.guests.length === 0 ? (
-                  <tr><td colSpan={7} className="px-4 py-12 text-center text-[#24332e]/60">Aún no hay invitados registrados.</td></tr>
+                  <tr><td colSpan={8} className="px-4 py-12 text-center text-[#24332e]/60">Aún no hay invitados registrados.</td></tr>
                 ) : data.guests.map((guest) => (
-                  <tr key={guest.id} className="align-top hover:bg-[#f6f3ec]/70">
+                    <tr key={guest.id} className={`align-top hover:bg-[#f6f3ec]/70 ${guest.unlikely_to_attend ? "bg-[#fff8d9]" : ""}`}>
                     <td className="min-w-64 px-4 py-4 font-medium">{guest.name}</td>
                     <td className="px-4 py-4">{guest.family ? <Check className="size-4 text-[#27613b]" /> : <span className="text-[#24332e]/45">-</span>}</td>
                     <td className="px-4 py-4"><span className={`inline-block px-2 py-1 text-xs ${guest.confirmation === "confirmed" ? "bg-[#dfece0] text-[#27613b]" : guest.confirmation === "declined" ? "bg-[#f6dfd8] text-[#8d3024]" : "bg-[#f3e8ca] text-[#765913]"}`}>{statusLabels[guest.confirmation]}</span></td>
                     <td className="px-4 py-4 whitespace-nowrap">{guest.used_passes_confirmed} / {guest.passes_number}</td>
+                    <td className="px-4 py-4"><input type="checkbox" checked={guest.unlikely_to_attend} disabled={updatingAttendanceId === guest.id} onChange={(event) => void updateUnlikelyToAttend(guest, event.target.checked)} aria-label={`Marcar que ${guest.name} probablemente no asiste`} className="size-4 cursor-pointer accent-[#d4a72c] disabled:cursor-wait" /></td>
                     <td className="max-w-96 px-4 py-4"><div className="flex items-center gap-2"><a href={guest.invitation_url || undefined} target="_blank" rel="noreferrer" className="truncate text-[#a04d34] underline underline-offset-2">{guest.invitation_url || "-"}</a><button onClick={() => void copyUrl(guest.invitation_url)} disabled={!guest.invitation_url} title="Copiar URL de invitación" className="inline-flex size-8 shrink-0 items-center justify-center border border-[#24332e]/20 hover:bg-[#e8eee8] disabled:opacity-35"><Copy className="size-3.5" /></button></div></td>
                     <td className="px-4 py-4"><input type="checkbox" checked={guest.invitation_sent} disabled={updatingInvitationId === guest.id} onChange={(event) => void updateInvitationSent(guest, event.target.checked)} aria-label={`Invitación enviada a ${guest.name}`} className="size-4 cursor-pointer accent-[#27613b] disabled:cursor-wait" /></td>
                     <td className="px-4 py-4"><div className="flex gap-2">{(guest.guest_observation || guest.internal_observation) && <button onClick={() => setGuestDetails(guest)} className="min-h-8 border border-[#24332e]/20 px-3 text-xs hover:bg-[#e8eee8]">Ver más</button>}<button onClick={() => openEditModal(guest)} title="Editar invitado" className="inline-flex size-8 items-center justify-center border border-[#24332e]/20 hover:bg-[#e8eee8]"><Pencil className="size-3.5" /></button><button onClick={() => setGuestToDelete(guest)} title="Eliminar invitado" className="inline-flex size-8 items-center justify-center border border-[#a04d34]/35 text-[#a04d34] hover:bg-[#fce9df]"><Trash2 className="size-3.5" /></button></div></td>
@@ -316,7 +385,7 @@ export function GuestsDashboard() {
           <div className="border border-[#24332e]/15 bg-white p-5">
             <h2 className="font-serif text-2xl">Estado de confirmación</h2>
             <div className="mt-4 grid grid-cols-2 divide-x divide-y divide-[#24332e]/15 sm:grid-cols-4 sm:divide-y-0">
-              {[ ["Invitaciones", data.total], ["Confirmados", data.summary.confirmedPasses], ["Pendientes", data.summary.pendingPasses], ["Declinados", data.summary.declinedPasses] ].map(([label, value]) => <div key={label as string} className="px-3 py-2 first:pl-0 sm:py-0 last:pr-0"><p className="text-2xl font-semibold tabular-nums">{value}</p><p className="mt-1 text-xs leading-tight text-[#24332e]/60">{label}</p></div>)}
+              {[ ["Esperados", data.summary.totalPasses - data.summary.unlikelyPasses], ["Seguro no asisten", data.summary.unlikelyPasses], ["Confirmados", data.summary.confirmedPasses], ["Pendientes", data.summary.pendingPasses], ["Declinados", data.summary.declinedPasses] ].map(([label, value]) => <div key={label as string} className="px-3 py-2 first:pl-0 sm:py-0 last:pr-0"><p className="text-2xl font-semibold tabular-nums">{value}</p><p className="mt-1 text-xs leading-tight text-[#24332e]/60">{label}</p></div>)}
             </div>
             <div className="mt-5 border-t border-[#24332e]/15 pt-4"><div className="flex items-baseline justify-between gap-3"><p className="text-sm font-medium">Cupo confirmado</p><p className="text-sm tabular-nums">{data.summary.confirmedPasses} / {MAX_CONFIRMED_GUESTS}</p></div><div className="mt-2 h-2 overflow-hidden bg-[#e8eee8]"><div className={`h-full ${data.summary.confirmedPasses > MAX_CONFIRMED_GUESTS ? "bg-[#a04d34]" : "bg-[#27613b]"}`} style={{ width: `${Math.min((data.summary.confirmedPasses / MAX_CONFIRMED_GUESTS) * 100, 100)}%` }} /></div><p className={`mt-2 text-xs ${data.summary.confirmedPasses > MAX_CONFIRMED_GUESTS ? "text-[#a04d34]" : "text-[#24332e]/60"}`}>{data.summary.confirmedPasses > MAX_CONFIRMED_GUESTS ? `Se excedió el cupo por ${data.summary.confirmedPasses - MAX_CONFIRMED_GUESTS} invitados.` : `Quedan ${MAX_CONFIRMED_GUESTS - data.summary.confirmedPasses} cupos disponibles.`}</p></div>
           </div>
@@ -335,6 +404,7 @@ export function GuestsDashboard() {
               <label className="text-sm font-medium">Cantidad de pases<input required min="1" step="1" type="number" value={form.passes_number} onChange={(event) => setForm({ ...form, passes_number: Number(event.target.value) })} className="mt-2 min-h-11 w-full border border-[#24332e]/25 bg-white px-3 outline-none focus:border-[#a04d34]" /></label>
               {editingGuest ? <><label className="text-sm font-medium">Estado<select value={form.confirmation} onChange={(event) => setForm({ ...form, confirmation: event.target.value as Guest["confirmation"] })} className="mt-2 min-h-11 w-full border border-[#24332e]/25 bg-white px-3 outline-none focus:border-[#a04d34]"><option value="pending">Pendiente</option><option value="confirmed">Confirmado</option><option value="declined">Declinó</option></select></label><label className="text-sm font-medium">Pases confirmados<input required min="0" max={form.passes_number} step="1" type="number" value={form.used_passes_confirmed} onChange={(event) => setForm({ ...form, used_passes_confirmed: Number(event.target.value) })} className="mt-2 min-h-11 w-full border border-[#24332e]/25 bg-white px-3 outline-none focus:border-[#a04d34]" /></label></> : <p className="self-end pb-3 text-sm text-[#24332e]/60">Estado inicial: <strong>Pendiente</strong></p>}
               <label className="flex min-h-11 items-center gap-3 border border-[#24332e]/15 px-3 text-sm"><input type="checkbox" checked={form.family} onChange={(event) => setForm({ ...form, family: event.target.checked })} className="size-4 accent-[#a04d34]" />¿Es una familia?</label>
+              <label className="flex min-h-11 items-center gap-3 border border-[#e5c94a]/50 bg-[#fff8d9] px-3 text-sm sm:col-span-2"><input type="checkbox" checked={form.unlikely_to_attend} onChange={(event) => setForm({ ...form, unlikely_to_attend: event.target.checked })} className="size-4 accent-[#a04d34]" />Muy probable que no asista</label>
               <fieldset className="sm:col-span-2"><legend className="text-sm font-medium">Vínculo</legend><div className="mt-2 grid gap-2 sm:grid-cols-4"><label className="flex min-h-11 items-center gap-2 border border-[#24332e]/15 px-3 text-sm"><input type="radio" name="relationship" checked={!form.groom_family && !form.bride_family && !form.friend} onChange={() => setForm({ ...form, groom_family: false, bride_family: false, friend: false })} className="size-4 accent-[#a04d34]" />Sin definir</label><label className="flex min-h-11 items-center gap-2 border border-[#24332e]/15 px-3 text-sm"><input type="radio" name="relationship" checked={form.groom_family} onChange={() => setForm({ ...form, groom_family: true, bride_family: false, friend: false })} className="size-4 accent-[#a04d34]" />Familia del novio</label><label className="flex min-h-11 items-center gap-2 border border-[#24332e]/15 px-3 text-sm"><input type="radio" name="relationship" checked={form.bride_family} onChange={() => setForm({ ...form, groom_family: false, bride_family: true, friend: false })} className="size-4 accent-[#a04d34]" />Familia de la novia</label><label className="flex min-h-11 items-center gap-2 border border-[#24332e]/15 px-3 text-sm"><input type="radio" name="relationship" checked={form.friend} onChange={() => setForm({ ...form, groom_family: false, bride_family: false, friend: true })} className="size-4 accent-[#a04d34]" />Amigo/a</label></div></fieldset>
               <label className="sm:col-span-2 text-sm font-medium">Observación interna<textarea value={form.internal_observation} onChange={(event) => setForm({ ...form, internal_observation: event.target.value })} rows={3} className="mt-2 w-full border border-[#24332e]/25 bg-white p-3 outline-none focus:border-[#a04d34]" /></label>
               {editingGuest && <label className="sm:col-span-2 flex min-h-11 items-center gap-3 border border-[#24332e]/15 px-3 text-sm"><input type="checkbox" checked={form.invitation_sent} onChange={(event) => setForm({ ...form, invitation_sent: event.target.checked })} className="size-4 accent-[#a04d34]" />Invitación enviada</label>}
