@@ -1,7 +1,6 @@
 "use client";
 
 import {
-  Check,
   ChevronLeft,
   ChevronRight,
   Pencil,
@@ -125,7 +124,7 @@ export function BudgetDashboard() {
   }
 
   useEffect(() => {
-    void loadData();
+    queueMicrotask(() => void loadData());
   }, []);
 
   function openCreateModal() {
