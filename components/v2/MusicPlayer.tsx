@@ -12,7 +12,7 @@ type MusicPlayerProps = {
 // Fixed top-right control that plays the V2 soundtrack; the hint only shows during the intro gate.
 export function MusicPlayer({ isPlaying, onToggle, showHint }: MusicPlayerProps) {
   return (
-    <div className="fixed right-4 top-4 z-50 flex items-start gap-1.5">
+    <div className="fixed right-4 top-4 z-[60] flex items-start gap-1.5">
       {showHint && (
         <div className="mt-1 max-w-24 text-right">
           <p className="gold-foil-text font-(family-name:--font-montserrat) text-[10px] font-semibold uppercase leading-tight tracking-[0.06em]">
