@@ -13,7 +13,7 @@ export function EventDetails() {
     <section className="relative flex min-h-dvh items-center overflow-hidden bg-transparent px-5 py-12 sm:px-10">
       <div className="pointer-events-none fixed inset-0 z-0" aria-hidden="true">
         <Image
-          src="/v2/photos/backgrounds/1.jpeg"
+          src="/v2/photos/backgrounds/1.JPEG"
           alt=""
           fill
           priority
