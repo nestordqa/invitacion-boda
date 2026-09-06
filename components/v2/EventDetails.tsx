@@ -1,4 +1,4 @@
-import { Church, Clock3, ExternalLink, MapPinned, PartyPopper } from "lucide-react";
+import { Church, ChevronDown, Clock3, ExternalLink, MapPinned, PartyPopper } from "lucide-react";
 import { CarnationDivider } from "./decor/CarnationDivider";
 import { LaceFiligree } from "./decor/LaceFiligree";
 
@@ -9,30 +9,35 @@ const events = [
 
 export function EventDetails() {
   return (
-    <section className="relative overflow-hidden bg-[#FDFBF7] px-5 py-16 sm:px-10">
-      <LaceFiligree className="pointer-events-none absolute -right-10 top-10 w-44 rotate-90 text-[#D4AF37]/40 sm:w-56" />
-      <div className="relative mx-auto max-w-xl">
-        <h2 className="text-center font-(family-name:--font-pinyon) text-5xl text-[#6B1D2F]">La Ceremonia</h2>
+    <section className="relative flex min-h-dvh items-center overflow-hidden bg-transparent px-5 py-12 sm:px-10">
+      <div
+        className="pointer-events-none fixed inset-0 -z-0 bg-[url('/v2/photos/backgrounds/4.JPEG')] bg-cover bg-center bg-fixed"
+        aria-hidden="true"
+      />
+      <div className="pointer-events-none absolute inset-0 z-0 bg-[#21140f]/55" aria-hidden="true" />
+      <LaceFiligree className="pointer-events-none absolute -right-10 top-10 z-10 w-44 rotate-90 text-[#D4AF37]/40 sm:w-56" />
+      <div className="relative z-10 mx-auto w-full max-w-xl">
+        <h2 className="text-center font-(family-name:--font-pinyon) text-5xl text-[#F7E7A6] drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">La Ceremonia</h2>
         <CarnationDivider className="mt-4" />
         <div className="mt-10 grid grid-cols-2 gap-6 text-center">
           {events.map((event) => (
             <article key={event.title}>
               {event.title === "La ceremonia" ? (
-                <Church className="mx-auto size-12 stroke-1 text-[#6B1D2F]" />
+                <Church className="mx-auto size-12 stroke-1 text-[#F7E7A6] drop-shadow-[0_2px_3px_rgba(0,0,0,0.8)]" />
               ) : (
-                <PartyPopper className="mx-auto size-12 stroke-1 text-[#6B1D2F]" />
+                <PartyPopper className="mx-auto size-12 stroke-1 text-[#F7E7A6] drop-shadow-[0_2px_3px_rgba(0,0,0,0.8)]" />
               )}
-              <h3 className="mt-3 font-(family-name:--font-pinyon) text-2xl text-[#6B1D2F]">{event.title}</h3>
-              <p className="mt-2 text-xs leading-4 text-[#333333]">{event.place}</p>
-              <p className="mt-5 flex items-center justify-center gap-2 font-(family-name:--font-montserrat) text-xl text-[#333333]">
-                <Clock3 className="size-4" />
+              <h3 className="mt-3 font-(family-name:--font-pinyon) text-3xl text-[#F7E7A6] drop-shadow-[0_2px_3px_rgba(0,0,0,0.8)]">{event.title}</h3>
+              <p className="mt-2 text-xs leading-4 text-[#FDFBF7] drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)]">{event.place}</p>
+              <p className="mt-5 flex items-center justify-center gap-2 font-(family-name:--font-montserrat) text-xl text-[#FDFBF7] drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)]">
+                <Clock3 className="size-4 text-[#F7E7A6]" />
                 {event.time}
               </p>
               <a
                 href={event.map}
                 target="_blank"
                 rel="noreferrer"
-                className="mt-4 inline-flex min-h-11 items-center justify-center gap-2 border border-[#D4AF37] px-3 text-xs text-[#6B1D2F] transition-colors hover:bg-[#6B1D2F] hover:text-[#FDFBF7]"
+                className="mt-4 inline-flex min-h-11 items-center justify-center gap-2 border border-[#F7E7A6] bg-[#21140f]/45 px-3 text-xs text-[#F7E7A6] shadow-[0_2px_4px_rgba(0,0,0,0.45)] backdrop-blur-[2px] transition-colors hover:bg-[#F7E7A6] hover:text-[#21140f]"
               >
                 <MapPinned className="size-4" />
                 Ver ubicación
@@ -41,7 +46,12 @@ export function EventDetails() {
             </article>
           ))}
         </div>
-        <div className="mt-14 flex aspect-4/3 items-center justify-center border border-[#D4AF37] bg-white text-xs uppercase tracking-[0.2em] text-[#333333]/55">Fotografía de la pareja</div>
+      </div>
+      <div className="absolute bottom-24 left-1/2 z-10 flex -translate-x-1/2 flex-row items-center gap-1 rounded-full text-[#F7E7A6] backdrop-blur-[2px] w-full justify-center items-center" aria-hidden="true">
+        <span className="font-(family-name:--font-montserrat) text-[12px] font-semibold uppercase tracking-[0.12em] drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
+          Desliza hacia abajo
+        </span>
+        <ChevronDown className="size-5 animate-bounce drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]" />
       </div>
     </section>
   );
