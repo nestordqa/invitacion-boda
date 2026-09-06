@@ -60,7 +60,7 @@ export function IntroGate({ guest }: IntroGateProps) {
       />
       <MusicPlayer isPlaying={isPlaying} onToggle={toggleMusic} showHint={stage === "intro"} />
       {stage !== "unlocked" && (
-        <div className="relative h-svh w-full overflow-hidden">
+        <div className="relative h-dvh w-full overflow-hidden">
           <AnimatePresence mode="wait">
             {stage === "intro" ? (
               <motion.div

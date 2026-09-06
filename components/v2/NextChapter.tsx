@@ -19,7 +19,7 @@ export function NextChapter({ guest, onEnterInvitation }: NextChapterProps) {
   return (
     <section
       id="next-chapter"
-      className="relative flex h-svh items-center justify-center overflow-hidden px-6 text-center"
+      className="relative flex h-dvh items-center justify-center overflow-hidden px-5 text-center"
     >
       <Image
         src="/v2/photos/church-3.jpg"
@@ -30,7 +30,7 @@ export function NextChapter({ guest, onEnterInvitation }: NextChapterProps) {
       />
       <div className="absolute inset-0 bg-[#21140f]/55" />
       <div className="pointer-events-none absolute inset-x-0 top-16 bottom-16 bg-[radial-gradient(ellipse_at_center,rgba(33,20,15,0.48)_0%,rgba(33,20,15,0.3)_48%,transparent_78%)]" />
-      <div className="relative mt-12 flex flex-col items-center gap-5 drop-shadow-[0_2px_4px_rgba(0,0,0,0.45)]">
+      <div className="relative flex max-h-[calc(100dvh-2rem)] flex-col items-center gap-5 overflow-y-auto py-8 drop-shadow-[0_2px_4px_rgba(0,0,0,0.45)] sm:max-h-[calc(100dvh-4rem)]">
         <h2 className="font-(family-name:--font-pinyon) text-5xl gold-foil-text sm:text-6xl">
           {title}
         </h2>
@@ -44,7 +44,7 @@ export function NextChapter({ guest, onEnterInvitation }: NextChapterProps) {
           type="button"
           onClick={onEnterInvitation}
           whileHover={{ scale: 1.05 }}
-          className="mt-24 flex flex-col items-center gap-2"
+          className="mt-8 flex shrink-0 flex-col items-center gap-2 sm:mt-12"
         >
           <span className="gold-foil-text font-(family-name:--font-montserrat) text-sm font-bold uppercase tracking-[0.14em]">
             Pulsa aquí

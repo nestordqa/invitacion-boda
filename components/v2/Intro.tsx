@@ -17,7 +17,7 @@ export function Intro({ guest, showCta, onNavigateNext }: IntroProps) {
   const guestName = guest ? (guest.family ? `Flia. ${guest.name}` : guest.name) : "Bienvenido";
 
   return (
-    <section className="relative flex h-svh items-center justify-center overflow-hidden bg-[#21140f]">
+    <section className="relative flex h-dvh items-center justify-center overflow-hidden bg-[#21140f]">
       <Image
         src="/letter/letter-2.jpg?v=2"
         alt="Sobre de invitación de boda de Néstor y Valentina"
@@ -40,7 +40,7 @@ export function Intro({ guest, showCta, onNavigateNext }: IntroProps) {
           className="absolute left-1/2 top-[42%] z-20 size-24 -translate-x-1/2 rounded-full focus:outline-none focus:ring-2 focus:ring-[#f7e7a6]/80 sm:size-28"
         />
       )}
-      <div className="absolute inset-x-0 bottom-32 z-10 flex justify-center">
+      <div className="relative inset-x-0 top-72 z-10 flex justify-center">
         <AnimatePresence>
           {showCta && (
             <motion.div
@@ -50,7 +50,7 @@ export function Intro({ guest, showCta, onNavigateNext }: IntroProps) {
               transition={{ duration: 0.7, ease: "easeOut" }}
               className="flex flex-col-reverse items-center gap-1"
             >
-              <span className="gold-foil-text font-(family-name:--font-montserrat) text-center text-sm font-semibold uppercase tracking-[0.1em]">
+              <span className="gold-foil-text font-(family-name:--font-montserrat) text-center text-sm font-semibold tracking-[0.1em]">
                 Pulsa el sello para abrir la carta
               </span>
             </motion.div>
