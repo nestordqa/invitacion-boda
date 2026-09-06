@@ -1,4 +1,4 @@
-export const RSVP_DEADLINE = new Date("2026-09-30T23:59:59-04:00");
+export const RSVP_DEADLINE = new Date("2026-10-15T23:59:59-04:00");
 
 export const MAX_CONFIRMED_GUESTS = 130;
 

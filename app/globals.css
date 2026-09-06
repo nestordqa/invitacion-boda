@@ -12,13 +12,6 @@ body {
   overflow-x: hidden;
 }
 
-/* Mobile Safari does not reliably support fixed background attachments. */
-@media (max-width: 767px) {
-  .photo-break {
-    background-attachment: scroll !important;
-  }
-}
-
 .font-script {
   font-family: var(--font-script), cursive;
 }
