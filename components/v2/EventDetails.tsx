@@ -11,7 +11,7 @@ export function EventDetails() {
   return (
     <section className="relative flex min-h-dvh items-center overflow-hidden bg-transparent px-5 py-12 sm:px-10">
       <div
-        className="pointer-events-none fixed inset-0 -z-0 bg-[url('/v2/photos/backgrounds/4.JPEG')] bg-cover bg-center bg-fixed"
+        className="pointer-events-none fixed inset-0 -z-0 bg-[url('/v2/photos/backgrounds/1.jpeg')] bg-cover bg-center bg-fixed"
         aria-hidden="true"
       />
       <div className="pointer-events-none absolute inset-0 z-0 bg-[#21140f]/55" aria-hidden="true" />
