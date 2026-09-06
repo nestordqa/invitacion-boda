@@ -1,4 +1,5 @@
 import { Church, ChevronDown, Clock3, ExternalLink, MapPinned, PartyPopper } from "lucide-react";
+import Image from "next/image";
 import { CarnationDivider } from "./decor/CarnationDivider";
 import { LaceFiligree } from "./decor/LaceFiligree";
 
@@ -10,11 +11,17 @@ const events = [
 export function EventDetails() {
   return (
     <section className="relative flex min-h-dvh items-center overflow-hidden bg-transparent px-5 py-12 sm:px-10">
-      <div
-        className="pointer-events-none fixed inset-0 -z-0 bg-[url('/v2/photos/backgrounds/1.jpeg')] bg-cover bg-center bg-fixed"
-        aria-hidden="true"
-      />
-      <div className="pointer-events-none absolute inset-0 z-0 bg-[#21140f]/55" aria-hidden="true" />
+      <div className="pointer-events-none fixed inset-0 z-0" aria-hidden="true">
+        <Image
+          src="/v2/photos/backgrounds/1.jpeg"
+          alt=""
+          fill
+          priority
+          sizes="100vw"
+          className="object-cover object-center"
+        />
+      </div>
+      <div className="pointer-events-none absolute inset-0 z-[1] bg-[#21140f]/55" aria-hidden="true" />
       <LaceFiligree className="pointer-events-none absolute -right-10 top-10 z-10 w-44 rotate-90 text-[#D4AF37]/40 sm:w-56" />
       <div className="relative z-10 mx-auto w-full max-w-xl">
         <h2 className="text-center font-(family-name:--font-pinyon) text-5xl text-[#F7E7A6] drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">La Ceremonia</h2>
