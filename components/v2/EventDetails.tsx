@@ -2,6 +2,7 @@ import { Church, ChevronDown, Clock3, ExternalLink, MapPinned, PartyPopper } fro
 import Image from "next/image";
 import { CarnationDivider } from "./decor/CarnationDivider";
 import { LaceFiligree } from "./decor/LaceFiligree";
+import { Countdown } from "./Countdown";
 
 const events = [
   { title: "La ceremonia", place: "Basílica Catedral de la Inmaculada Concepción", time: "5:30 P. M.", map: "https://maps.app.goo.gl/6Bo6cBJmGqapTupt7?g_st=ic" },
@@ -53,6 +54,9 @@ export function EventDetails() {
               </a>
             </article>
           ))}
+        </div>
+        <div className="mt-8 drop-shadow-[0_2px_4px_rgba(0,0,0,0.65)]">
+          <Countdown />
         </div>
       </div>
       <div className="absolute bottom-24 left-1/2 z-10 flex -translate-x-1/2 flex-row items-center gap-1 rounded-full text-[#F7E7A6] backdrop-blur-[2px] w-full justify-center items-center" aria-hidden="true">

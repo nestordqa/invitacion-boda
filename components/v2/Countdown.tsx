@@ -33,15 +33,15 @@ export function Countdown() {
       {Object.entries(timeLeft).map(([label, value], index) => (
         <div key={label} className="flex items-start">
           {index > 0 && (
-            <span className="mr-3 mt-1 font-(family-name:--font-pinyon) text-2xl leading-none text-[#D4AF37] sm:mr-5">
+            <span className="mr-3 mt-1 font-(family-name:--font-pinyon) text-2xl leading-none text-[#FFF] sm:mr-5">
               ·
             </span>
           )}
           <div className="min-w-11 text-center sm:min-w-14">
-            <p className="gold-foil-text font-(family-name:--font-montserrat) text-2xl font-semibold tabular-nums sm:text-3xl">
+            <p className="text-[#FFF] font-(family-name:--font-montserrat) text-2xl font-semibold tabular-nums sm:text-3xl">
               {String(value).padStart(2, "0")}
             </p>
-            <p className="mt-1 text-[9px] font-(family-name:--font-montserrat) uppercase tracking-[0.16em] text-[#8a6a22]/80 sm:text-[10px]">
+            <p className="mt-1 text-[9px] font-(family-name:--font-montserrat) uppercase tracking-[0.16em] text-[#FDFBF7] sm:text-[10px]">
               {label}
             </p>
           </div>

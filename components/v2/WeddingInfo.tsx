@@ -48,7 +48,7 @@ export function WeddingInfo() {
           <h2 className="mt-9 font-(family-name:--font-pinyon) text-4xl text-[#6B1D2F]">Bebidas y Celebración</h2>
           <p className="mt-3">La casa ofrecerá la copa de champaña para el brindis inicial y una botella de whisky por mesa. Puedes traer tu bebida adicional de preferencia.</p>
           <h2 className="mt-9 font-(family-name:--font-pinyon) text-4xl text-[#6B1D2F]">¿Puedo llevar niños?</h2>
-          <p className="mt-3">La recepción será solo para adultos, agradecemos su comprensión. Niños, dulce sueños en casa; padres, en la pista de baile.</p>
+          <p className="mt-3">La recepción será solo para adultos, agradecemos su comprensión. Niños, dulces sueños en casa; padres, en la pista de baile.</p>
         </div>
       </div>
     </section>
