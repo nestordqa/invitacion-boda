@@ -24,8 +24,8 @@ export function InvitationV2({ guest, token }: InvitationV2Props) {
       <IntroGate guest={guest} />
       {/* <Story /> */}
       <EventDetails />
-      <Itinerary />
       <WeddingInfo />
+      <Itinerary />
       <PhotoAlbum />
       <RsvpForm guest={guest} token={token} />
     </main>
