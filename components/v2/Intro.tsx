@@ -17,7 +17,7 @@ export function Intro({ guest, showCta, onNavigateNext }: IntroProps) {
   const guestName = guest ? (guest.family ? `Flia. ${guest.name}` : guest.name) : "Bienvenido";
 
   return (
-    <section className="relative flex h-dvh items-center justify-center overflow-hidden bg-[#21140f]">
+    <section className="relative flex h-full min-h-0 items-center justify-center overflow-hidden bg-[#21140f]">
       <Image
         src="/letter/letter-2.jpg?v=2"
         alt="Sobre de invitación de boda de Néstor y Valentina"

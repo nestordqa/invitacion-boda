@@ -19,7 +19,7 @@ export function NextChapter({ guest, onEnterInvitation }: NextChapterProps) {
   return (
     <section
       id="next-chapter"
-      className="relative flex h-dvh items-center justify-center overflow-hidden px-5 text-center"
+      className="relative flex h-full min-h-0 items-center justify-center overflow-hidden px-5 text-center"
     >
       <Image
         src="/v2/photos/church-3.jpg"

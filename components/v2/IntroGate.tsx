@@ -32,6 +32,23 @@ export function IntroGate({ guest }: IntroGateProps) {
     };
   }, [stage]);
 
+  useEffect(() => {
+    const updateViewportHeight = () => {
+      const height = window.visualViewport?.height ?? window.innerHeight;
+      document.documentElement.style.setProperty("--v2-viewport-height", `${height}px`);
+    };
+
+    updateViewportHeight();
+    window.visualViewport?.addEventListener("resize", updateViewportHeight);
+    window.visualViewport?.addEventListener("scroll", updateViewportHeight);
+
+    return () => {
+      window.visualViewport?.removeEventListener("resize", updateViewportHeight);
+      window.visualViewport?.removeEventListener("scroll", updateViewportHeight);
+      document.documentElement.style.removeProperty("--v2-viewport-height");
+    };
+  }, []);
+
   async function toggleMusic() {
     const audio = audioRef.current;
     if (!audio) return;
@@ -60,12 +77,15 @@ export function IntroGate({ guest }: IntroGateProps) {
       />
       <MusicPlayer isPlaying={isPlaying} onToggle={toggleMusic} showHint={stage === "intro"} />
       {stage !== "unlocked" && (
-        <div className="relative h-dvh w-full overflow-hidden">
+        <div
+          className="fixed inset-x-0 top-0 z-50 w-full overflow-hidden bg-[#21140f]"
+          style={{ height: "var(--v2-viewport-height, 100dvh)" }}
+        >
           <AnimatePresence mode="wait">
             {stage === "intro" ? (
               <motion.div
                 key="intro"
-                className="absolute inset-0"
+                className="absolute inset-0 h-full"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0, scale: 0.97, transition: { duration: 0.5, ease: "easeIn" } }}
@@ -76,7 +96,7 @@ export function IntroGate({ guest }: IntroGateProps) {
             ) : (
               <motion.div
                 key="next"
-                className="absolute inset-0"
+                className="absolute inset-0 h-full"
                 initial={{ opacity: 0, scale: 1.04 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, transition: { duration: 0.4, ease: "easeIn" } }}
