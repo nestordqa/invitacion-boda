@@ -1,7 +1,9 @@
+import { Blessing } from "./Blessing";
 import { EventDetails } from "./EventDetails";
 import { IntroGate } from "./IntroGate";
 import { Itinerary } from "./Itinerary";
 import { PhotoAlbum } from "./PhotoAlbum";
+import { PhotoBreak } from "./PhotoBreak";
 import { RsvpForm } from "./RsvpForm";
 import { Story } from "./Story";
 import { WeddingInfo } from "./WeddingInfo";
@@ -24,8 +26,10 @@ export function InvitationV2({ guest, token }: InvitationV2Props) {
       <IntroGate guest={guest} />
       {/* <Story /> */}
       <EventDetails />
+      <Blessing />
       <WeddingInfo />
       <Itinerary />
+      <PhotoBreak src="/v2/photos/backgrounds/3.jpeg" alt="Detalle de la celebración de boda" />
       <PhotoAlbum />
       <RsvpForm guest={guest} token={token} />
     </main>

@@ -63,7 +63,7 @@ export function RsvpForm({ guest, token }: RsvpFormProps) {
       <LaceFiligree className="pointer-events-none absolute -left-10 top-6 w-44 text-[#D4AF37]/40 sm:w-56" />
       <LaceFiligree className="pointer-events-none absolute -right-10 bottom-6 w-44 rotate-180 text-[#D4AF37]/40 sm:w-56" />
       <div className="relative mx-auto max-w-xl">
-        <p className="text-center font-(family-name:--font-montserrat) text-sm text-[#333333]">Antes del {RSVP_DEADLINE_LABEL}</p>
+        <p className="mb-8 text-center font-(family-name:--font-montserrat) text-sm text-[#333333]">Antes del {RSVP_DEADLINE_LABEL}</p>
         <h2 className="mt-2 text-center font-(family-name:--font-pinyon) text-5xl text-[#6B1D2F]">Confirma tu asistencia</h2>
         <CarnationDivider className="mt-4" />
 
