@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
 
   const guestsQuery = supabase
     .from("guests")
-    .select("id, family, name, groom_family, bride_family, friend, confirmation, passes_number, used_passes_confirmed, guest_observation, internal_observation, invitation_token, invitation_url, invitation_sent, unlikely_to_attend, created_at", { count: "exact" })
+    .select("id, family, name, groom_family, bride_family, friend, confirmation, passes_number, used_passes_confirmed, guest_observation, internal_observation, invitation_token, invitation_url, invitation_sent, unlikely_to_attend, is_abroad, created_at", { count: "exact" })
     .order("created_at", { ascending: false })
     .range(start, start + pageSize - 1);
   const { data, error, count } = await applyFilters(guestsQuery, { relationships, status, sent, search });
@@ -108,6 +108,7 @@ export async function POST(request: NextRequest) {
       invitation_token: invitationToken,
       invitation_url: invitationUrl,
       invitation_sent: false,
+      is_abroad: Boolean(body.is_abroad),
     })
     .select()
     .single();

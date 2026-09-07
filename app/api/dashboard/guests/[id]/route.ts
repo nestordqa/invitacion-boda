@@ -32,6 +32,7 @@ export async function PATCH(request: NextRequest, context: RouteContext<"/api/da
       internal_observation: typeof body.internal_observation === "string" ? body.internal_observation.trim() || null : null,
       unlikely_to_attend: Boolean(body.unlikely_to_attend),
       invitation_sent: Boolean(body.invitation_sent),
+      is_abroad: Boolean(body.is_abroad),
       updated_at: new Date().toISOString(),
     })
     .eq("id", guestId)

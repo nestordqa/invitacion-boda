@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, ChevronLeft, ChevronRight, Copy, Pencil, Plus, Trash2, X } from "lucide-react";
+import { Check, ChevronLeft, ChevronRight, Copy, MessageCircle, Pencil, Plus, Trash2, X } from "lucide-react";
 import { FormEvent, useEffect, useState } from "react";
 import { formatGuestName, MAX_CONFIRMED_GUESTS } from "@/utils/wedding";
 import { DashboardNav } from "./DashboardNav";
@@ -20,6 +20,7 @@ type Guest = {
   invitation_url: string | null;
   invitation_sent: boolean;
   unlikely_to_attend: boolean;
+  is_abroad: boolean;
 };
 
 type GuestSummary = {
@@ -55,6 +56,7 @@ type GuestForm = {
   friend: boolean;
   internal_observation: string;
   unlikely_to_attend: boolean;
+  is_abroad: boolean;
 };
 
 const initialForm: GuestForm = {
@@ -69,10 +71,21 @@ const initialForm: GuestForm = {
   friend: false,
   internal_observation: "",
   unlikely_to_attend: false,
+  is_abroad: false,
 };
 
 const statusLabels = { pending: "Pendiente", confirmed: "Confirmado", declined: "Declinó" };
 const initialFilters: GuestFilters = { relationships: [], status: "", sent: "", search: "" };
+
+const albumUrl = "https://photos.app.goo.gl/52EmLBVbxbu4fWbY7";
+
+function buildInvitationMessage(template: string, guest: Guest) {
+  return template
+    .replaceAll("{{nombre}}", guest.name)
+    .replaceAll("{{pases}}", String(guest.passes_number))
+    .replaceAll("{{url}}", guest.invitation_url || "")
+    .replaceAll("{{album_url}}", albumUrl);
+}
 
 function updateSummary(summary: GuestSummary, guest: Guest, direction: 1 | -1) {
   const confirmedPasses = guest.confirmation === "confirmed" ? guest.used_passes_confirmed : 0;
@@ -103,8 +116,26 @@ export function GuestsDashboard() {
   const [filters, setFilters] = useState<GuestFilters>(initialFilters);
   const [pageSize, setPageSize] = useState(() => typeof window !== "undefined" && window.matchMedia("(max-width: 767px)").matches ? 5 : 20);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isMessageModalOpen, setIsMessageModalOpen] = useState(false);
+  const [messageTemplates, setMessageTemplates] = useState({ standard: "", abroad: "" });
+  const [messageTemplateType, setMessageTemplateType] = useState<"standard" | "abroad">("standard");
+  const [messageTemplate, setMessageTemplate] = useState("");
+  const [isMessageLoading, setIsMessageLoading] = useState(false);
+  const [messageError, setMessageError] = useState("");
   const [error, setError] = useState("");
   const [formError, setFormError] = useState("");
+
+  useEffect(() => {
+    fetch("/api/dashboard/invitation-message")
+      .then(async (response) => {
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error || "No se pudo cargar la plantilla.");
+        const templates = Object.fromEntries(result.templates.map((template: { template_type: "standard" | "abroad"; content: string }) => [template.template_type, template.content])) as { standard?: string; abroad?: string };
+        setMessageTemplates({ standard: templates.standard || "", abroad: templates.abroad || "" });
+        setMessageTemplate(templates.standard || "");
+      })
+      .catch((loadError: unknown) => setMessageError(loadError instanceof Error ? loadError.message : "No se pudo cargar la plantilla."));
+  }, []);
 
   async function loadGuests(page: number, appliedFilters = filters, appliedPageSize = pageSize) {
     setIsLoading(true);
@@ -184,6 +215,42 @@ export function GuestsDashboard() {
     await navigator.clipboard.writeText(url);
   }
 
+  async function copyInvitationMessage(guest: Guest) {
+    const template = messageTemplates[guest.is_abroad ? "abroad" : "standard"];
+    if (!template) {
+      setMessageError("Primero guarda una plantilla de mensaje.");
+      return;
+    }
+    await navigator.clipboard.writeText(buildInvitationMessage(template, guest));
+  }
+
+  async function saveMessageTemplate(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setIsMessageLoading(true);
+    setMessageError("");
+    try {
+      const response = await fetch("/api/dashboard/invitation-message", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content: messageTemplate, template_type: messageTemplateType }),
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || "No se pudo guardar la plantilla.");
+      setMessageTemplates((current) => ({ ...current, [messageTemplateType]: result.template.content }));
+      setIsMessageModalOpen(false);
+    } catch (saveError) {
+      setMessageError(saveError instanceof Error ? saveError.message : "No se pudo guardar la plantilla.");
+    } finally {
+      setIsMessageLoading(false);
+    }
+  }
+
+  function openMessageModal() {
+    setMessageTemplate(messageTemplates[messageTemplateType]);
+    setMessageError("");
+    setIsMessageModalOpen(true);
+  }
+
   function openCreateModal() {
     setEditingGuest(null);
     setForm(initialForm);
@@ -206,6 +273,7 @@ export function GuestsDashboard() {
       friend: guest.friend,
       internal_observation: guest.internal_observation || "",
       unlikely_to_attend: guest.unlikely_to_attend,
+      is_abroad: guest.is_abroad,
     });
     setIsModalOpen(true);
   }
@@ -304,7 +372,8 @@ export function GuestsDashboard() {
     form.bride_family !== editingGuest.bride_family ||
     form.friend !== editingGuest.friend ||
     form.internal_observation !== (editingGuest.internal_observation || "") ||
-    form.unlikely_to_attend !== editingGuest.unlikely_to_attend;
+    form.unlikely_to_attend !== editingGuest.unlikely_to_attend ||
+    form.is_abroad !== editingGuest.is_abroad;
 
   return (
     <main className="min-h-screen bg-[#f6f3ec] px-4 py-8 text-[#24332e] sm:px-8 lg:px-12">
@@ -316,12 +385,18 @@ export function GuestsDashboard() {
             <h1 className="mt-1 font-serif text-4xl font-medium">Invitados</h1>
             <p className="mt-2 text-sm text-[#24332e]/65">{data.summary.totalPasses} invitados registrados en {data.total} invitaciones</p>
           </div>
-          <button onClick={openCreateModal} className="inline-flex min-h-11 items-center justify-center gap-2 bg-[#24332e] px-4 text-sm font-medium text-[#f6f3ec] transition-colors hover:bg-[#a04d34]">
-            <Plus className="size-4" /> Agregar invitado
-          </button>
+          <div className="flex flex-wrap gap-2">
+            <button onClick={openMessageModal} className="inline-flex min-h-11 items-center justify-center gap-2 border border-[#24332e]/25 px-4 text-sm font-medium transition-colors hover:bg-[#e8eee8]">
+              <MessageCircle className="size-4" /> Mensaje de invitación
+            </button>
+            <button onClick={openCreateModal} className="inline-flex min-h-11 items-center justify-center gap-2 bg-[#24332e] px-4 text-sm font-medium text-[#f6f3ec] transition-colors hover:bg-[#a04d34]">
+              <Plus className="size-4" /> Agregar invitado
+            </button>
+          </div>
         </header>
 
         {error && !isModalOpen && <p className="mt-5 border border-[#a04d34]/35 bg-[#fce9df] px-4 py-3 text-sm text-[#822f20]">{error}</p>}
+        {messageError && !isMessageModalOpen && <p className="mt-5 border border-[#a04d34]/35 bg-[#fce9df] px-4 py-3 text-sm text-[#822f20]">{messageError}</p>}
 
         <section className="mt-6 border border-[#24332e]/15 bg-white p-4 sm:p-5">
           <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-[minmax(14rem,1fr)_minmax(22rem,1fr)_auto_auto_auto] xl:items-end">
@@ -343,13 +418,13 @@ export function GuestsDashboard() {
           <div className="hidden overflow-x-auto md:block">
             <table className="w-full min-w-280 border-collapse text-left text-sm">
               <thead className="bg-[#e8eee8] text-xs uppercase tracking-[0.08em] text-[#24332e]/70">
-                <tr>{["Invitado", "¿Es una familia?", "Estado", "Pases", "No asiste", "URL", "Enviada", "Acciones"].map((label) => <th key={label} className="whitespace-nowrap px-4 py-4 font-semibold">{label}</th>)}</tr>
+                <tr>{["Invitado", "¿Es una familia?", "Estado", "Pases", "No asiste", "URL", "Mensaje", "Enviada", "Acciones"].map((label) => <th key={label} className="whitespace-nowrap px-4 py-4 font-semibold">{label}</th>)}</tr>
               </thead>
               <tbody className="divide-y divide-[#24332e]/10">
                 {isLoading ? (
-                  <tr><td colSpan={8} className="px-4 py-12 text-center text-[#24332e]/60">Cargando invitados...</td></tr>
+                  <tr><td colSpan={9} className="px-4 py-12 text-center text-[#24332e]/60">Cargando invitados...</td></tr>
                 ) : data.guests.length === 0 ? (
-                  <tr><td colSpan={8} className="px-4 py-12 text-center text-[#24332e]/60">Aún no hay invitados registrados.</td></tr>
+                  <tr><td colSpan={9} className="px-4 py-12 text-center text-[#24332e]/60">Aún no hay invitados registrados.</td></tr>
                 ) : data.guests.map((guest) => (
                     <tr key={guest.id} className={`align-top hover:bg-[#f6f3ec]/70 ${guest.unlikely_to_attend ? "bg-[#fff8d9]" : ""}`}>
                     <td className="min-w-64 px-4 py-4 font-medium">{guest.name}</td>
@@ -358,6 +433,7 @@ export function GuestsDashboard() {
                     <td className="px-4 py-4 whitespace-nowrap">{guest.used_passes_confirmed} / {guest.passes_number}</td>
                     <td className="px-4 py-4"><input type="checkbox" checked={guest.unlikely_to_attend} disabled={updatingAttendanceId === guest.id} onChange={(event) => void updateUnlikelyToAttend(guest, event.target.checked)} aria-label={`Marcar que ${guest.name} probablemente no asiste`} className="size-4 cursor-pointer accent-[#d4a72c] disabled:cursor-wait" /></td>
                     <td className="max-w-96 px-4 py-4"><div className="flex items-center gap-2"><a href={guest.invitation_url || undefined} target="_blank" rel="noreferrer" className="truncate text-[#a04d34] underline underline-offset-2">{guest.invitation_url || "-"}</a><button onClick={() => void copyUrl(guest.invitation_url)} disabled={!guest.invitation_url} title="Copiar URL de invitación" className="inline-flex size-8 shrink-0 items-center justify-center border border-[#24332e]/20 hover:bg-[#e8eee8] disabled:opacity-35"><Copy className="size-3.5" /></button></div></td>
+                    <td className="px-4 py-4"><button onClick={() => void copyInvitationMessage(guest)} disabled={!messageTemplates[guest.is_abroad ? "abroad" : "standard"] || !guest.invitation_url} title={`Copiar mensaje ${guest.is_abroad ? "para el exterior" : "personalizado"}`} className="inline-flex size-8 items-center justify-center border border-[#24332e]/20 hover:bg-[#e8eee8] disabled:opacity-35"><MessageCircle className="size-3.5" /></button></td>
                     <td className="px-4 py-4"><input type="checkbox" checked={guest.invitation_sent} disabled={updatingInvitationId === guest.id} onChange={(event) => void updateInvitationSent(guest, event.target.checked)} aria-label={`Invitación enviada a ${guest.name}`} className="size-4 cursor-pointer accent-[#27613b] disabled:cursor-wait" /></td>
                     <td className="px-4 py-4"><div className="flex gap-2">{(guest.guest_observation || guest.internal_observation) && <button onClick={() => setGuestDetails(guest)} className="min-h-8 border border-[#24332e]/20 px-3 text-xs hover:bg-[#e8eee8]">Ver más</button>}<button onClick={() => openEditModal(guest)} title="Editar invitado" className="inline-flex size-8 items-center justify-center border border-[#24332e]/20 hover:bg-[#e8eee8]"><Pencil className="size-3.5" /></button><button onClick={() => setGuestToDelete(guest)} title="Eliminar invitado" className="inline-flex size-8 items-center justify-center border border-[#a04d34]/35 text-[#a04d34] hover:bg-[#fce9df]"><Trash2 className="size-3.5" /></button></div></td>
                   </tr>
@@ -392,6 +468,27 @@ export function GuestsDashboard() {
         </section>
       </div>
 
+      {isMessageModalOpen && (
+        <div role="dialog" aria-modal="true" aria-labelledby="message-modal-title" className="fixed inset-0 z-50 grid place-items-center bg-[#18231f]/55 p-4">
+          <form onSubmit={saveMessageTemplate} className="max-h-[90vh] w-full max-w-2xl overflow-y-auto bg-[#fdfcf8] p-6 shadow-2xl sm:p-8">
+            <div className="flex items-start justify-between gap-4 border-b border-[#24332e]/15 pb-5">
+              <div><p className="text-xs uppercase tracking-[0.14em] text-[#a04d34]">Plantilla dinámica</p><h2 id="message-modal-title" className="mt-1 font-serif text-3xl">Mensaje de invitación</h2></div>
+              <button type="button" onClick={() => setIsMessageModalOpen(false)} aria-label="Cerrar modal" className="inline-flex size-9 items-center justify-center border border-[#24332e]/20"><X className="size-4" /></button>
+            </div>
+            <div className="mt-6 flex gap-2 border-b border-[#24332e]/15 pb-4">
+              {([ ["standard", "Invitados locales"], ["abroad", "Invitados en el exterior"] ] as const).map(([value, label]) => (
+                <button key={value} type="button" onClick={() => { setMessageTemplateType(value); setMessageTemplate(messageTemplates[value]); setMessageError(""); }} className={`min-h-10 px-3 text-sm ${messageTemplateType === value ? "bg-[#24332e] text-white" : "border border-[#24332e]/20"}`}>
+                  {label}
+                </button>
+              ))}
+            </div>
+            <p className="mt-5 text-sm text-[#24332e]/70">Variables disponibles: <code>{"{{nombre}}"}</code>, <code>{"{{pases}}"}</code>, <code>{"{{url}}"}</code> y <code>{"{{album_url}}"}</code>.</p>
+            <textarea value={messageTemplate} onChange={(event) => setMessageTemplate(event.target.value)} rows={16} className="mt-3 w-full border border-[#24332e]/25 bg-white p-3 text-sm leading-6 outline-none focus:border-[#a04d34]" aria-label="Plantilla del mensaje" />
+            {messageError && <p role="alert" className="mt-3 text-sm text-[#822f20]">{messageError}</p>}
+            <div className="mt-6 flex justify-end gap-3 border-t border-[#24332e]/15 pt-5"><button type="button" onClick={() => setIsMessageModalOpen(false)} className="min-h-11 px-4 text-sm">Cancelar</button><button disabled={isMessageLoading} className="inline-flex min-h-11 items-center gap-2 bg-[#24332e] px-5 text-sm font-medium text-white disabled:opacity-50">{isMessageLoading ? "Guardando..." : "Guardar plantilla"}</button></div>
+          </form>
+        </div>
+      )}
       {isModalOpen && (
         <div role="dialog" aria-modal="true" aria-labelledby="guest-modal-title" className="fixed inset-0 z-50 grid place-items-center bg-[#18231f]/55 p-4">
           <form onSubmit={handleSubmit} className="max-h-[90vh] w-full max-w-2xl overflow-y-auto bg-[#fdfcf8] p-6 shadow-2xl sm:p-8">
@@ -405,6 +502,7 @@ export function GuestsDashboard() {
               {editingGuest ? <><label className="text-sm font-medium">Estado<select value={form.confirmation} onChange={(event) => setForm({ ...form, confirmation: event.target.value as Guest["confirmation"] })} className="mt-2 min-h-11 w-full border border-[#24332e]/25 bg-white px-3 outline-none focus:border-[#a04d34]"><option value="pending">Pendiente</option><option value="confirmed">Confirmado</option><option value="declined">Declinó</option></select></label><label className="text-sm font-medium">Pases confirmados<input required min="0" max={form.passes_number} step="1" type="number" value={form.used_passes_confirmed} onChange={(event) => setForm({ ...form, used_passes_confirmed: Number(event.target.value) })} className="mt-2 min-h-11 w-full border border-[#24332e]/25 bg-white px-3 outline-none focus:border-[#a04d34]" /></label></> : <p className="self-end pb-3 text-sm text-[#24332e]/60">Estado inicial: <strong>Pendiente</strong></p>}
               <label className="flex min-h-11 items-center gap-3 border border-[#24332e]/15 px-3 text-sm"><input type="checkbox" checked={form.family} onChange={(event) => setForm({ ...form, family: event.target.checked })} className="size-4 accent-[#a04d34]" />¿Es una familia?</label>
               <label className="flex min-h-11 items-center gap-3 border border-[#e5c94a]/50 bg-[#fff8d9] px-3 text-sm sm:col-span-2"><input type="checkbox" checked={form.unlikely_to_attend} onChange={(event) => setForm({ ...form, unlikely_to_attend: event.target.checked })} className="size-4 accent-[#a04d34]" />Muy probable que no asista</label>
+              <label className="flex min-h-11 items-center gap-3 border border-[#24332e]/15 px-3 text-sm sm:col-span-2"><input type="checkbox" checked={form.is_abroad} onChange={(event) => setForm({ ...form, is_abroad: event.target.checked })} className="size-4 accent-[#a04d34]" />Invitado en el exterior</label>
               <fieldset className="sm:col-span-2"><legend className="text-sm font-medium">Vínculo</legend><div className="mt-2 grid gap-2 sm:grid-cols-4"><label className="flex min-h-11 items-center gap-2 border border-[#24332e]/15 px-3 text-sm"><input type="radio" name="relationship" checked={!form.groom_family && !form.bride_family && !form.friend} onChange={() => setForm({ ...form, groom_family: false, bride_family: false, friend: false })} className="size-4 accent-[#a04d34]" />Sin definir</label><label className="flex min-h-11 items-center gap-2 border border-[#24332e]/15 px-3 text-sm"><input type="radio" name="relationship" checked={form.groom_family} onChange={() => setForm({ ...form, groom_family: true, bride_family: false, friend: false })} className="size-4 accent-[#a04d34]" />Familia del novio</label><label className="flex min-h-11 items-center gap-2 border border-[#24332e]/15 px-3 text-sm"><input type="radio" name="relationship" checked={form.bride_family} onChange={() => setForm({ ...form, groom_family: false, bride_family: true, friend: false })} className="size-4 accent-[#a04d34]" />Familia de la novia</label><label className="flex min-h-11 items-center gap-2 border border-[#24332e]/15 px-3 text-sm"><input type="radio" name="relationship" checked={form.friend} onChange={() => setForm({ ...form, groom_family: false, bride_family: false, friend: true })} className="size-4 accent-[#a04d34]" />Amigo/a</label></div></fieldset>
               <label className="sm:col-span-2 text-sm font-medium">Observación interna<textarea value={form.internal_observation} onChange={(event) => setForm({ ...form, internal_observation: event.target.value })} rows={3} className="mt-2 w-full border border-[#24332e]/25 bg-white p-3 outline-none focus:border-[#a04d34]" /></label>
               {editingGuest && <label className="sm:col-span-2 flex min-h-11 items-center gap-3 border border-[#24332e]/15 px-3 text-sm"><input type="checkbox" checked={form.invitation_sent} onChange={(event) => setForm({ ...form, invitation_sent: event.target.checked })} className="size-4 accent-[#a04d34]" />Invitación enviada</label>}
