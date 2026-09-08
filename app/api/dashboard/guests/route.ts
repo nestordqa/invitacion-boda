@@ -58,9 +58,10 @@ export async function GET(request: NextRequest) {
     if (guest.friend) totals.friendPasses += guest.passes_number;
     if (guest.confirmation === "confirmed") totals.confirmedPasses += confirmedPasses;
     if (guest.confirmation === "pending") totals.pendingPasses += guest.passes_number;
+    if (guest.confirmation === "pending" && !guest.unlikely_to_attend) totals.expectedPendingPasses += guest.passes_number;
     if (guest.confirmation === "declined") totals.declinedPasses += guest.passes_number;
     return totals;
-  }, { totalPasses: 0, groomFamilyPasses: 0, brideFamilyPasses: 0, friendPasses: 0, confirmedPasses: 0, pendingPasses: 0, declinedPasses: 0, unlikelyGuests: 0, unlikelyPasses: 0 });
+  }, { totalPasses: 0, groomFamilyPasses: 0, brideFamilyPasses: 0, friendPasses: 0, confirmedPasses: 0, pendingPasses: 0, expectedPendingPasses: 0, declinedPasses: 0, unlikelyGuests: 0, unlikelyPasses: 0 });
 
   return Response.json({ guests: data, page, pageSize, total: count ?? 0, summary });
 }

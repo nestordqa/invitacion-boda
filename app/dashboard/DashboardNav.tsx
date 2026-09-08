@@ -1,10 +1,11 @@
 import Link from "next/link";
 
-type DashboardNavProps = { active: "guests" | "budget" };
+type DashboardNavProps = { active: "guests" | "tables" | "budget" };
 
 export function DashboardNav({ active }: DashboardNavProps) {
   const items = [
     { href: "/dashboard", label: "Invitados", key: "guests" },
+    { href: "/dashboard/organizacion-mesas", label: "Organización de mesas", key: "tables" },
     { href: "/dashboard/compras-pagos", label: "Compras y pagos", key: "budget" },
   ] as const;
 

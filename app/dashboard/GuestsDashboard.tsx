@@ -30,6 +30,7 @@ type GuestSummary = {
   friendPasses: number;
   confirmedPasses: number;
   pendingPasses: number;
+  expectedPendingPasses: number;
   declinedPasses: number;
   unlikelyGuests: number;
   unlikelyPasses: number;
@@ -97,6 +98,7 @@ function updateSummary(summary: GuestSummary, guest: Guest, direction: 1 | -1) {
     friendPasses: summary.friendPasses + (guest.friend ? direction * guest.passes_number : 0),
     confirmedPasses: summary.confirmedPasses + direction * confirmedPasses,
     pendingPasses: summary.pendingPasses + (guest.confirmation === "pending" ? direction * guest.passes_number : 0),
+    expectedPendingPasses: summary.expectedPendingPasses + (guest.confirmation === "pending" && !guest.unlikely_to_attend ? direction * guest.passes_number : 0),
     declinedPasses: summary.declinedPasses + (guest.confirmation === "declined" ? direction * guest.passes_number : 0),
     unlikelyGuests: summary.unlikelyGuests + (guest.unlikely_to_attend ? direction : 0),
     unlikelyPasses: summary.unlikelyPasses + (guest.unlikely_to_attend ? direction * guest.passes_number : 0),
@@ -104,7 +106,7 @@ function updateSummary(summary: GuestSummary, guest: Guest, direction: 1 | -1) {
 }
 
 export function GuestsDashboard() {
-  const [data, setData] = useState<GuestsResponse>({ guests: [], page: 1, pageSize: 10, total: 0, summary: { totalPasses: 0, groomFamilyPasses: 0, brideFamilyPasses: 0, friendPasses: 0, confirmedPasses: 0, pendingPasses: 0, declinedPasses: 0, unlikelyGuests: 0, unlikelyPasses: 0 } });
+  const [data, setData] = useState<GuestsResponse>({ guests: [], page: 1, pageSize: 10, total: 0, summary: { totalPasses: 0, groomFamilyPasses: 0, brideFamilyPasses: 0, friendPasses: 0, confirmedPasses: 0, pendingPasses: 0, expectedPendingPasses: 0, declinedPasses: 0, unlikelyGuests: 0, unlikelyPasses: 0 } });
   const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [form, setForm] = useState(initialForm);
@@ -461,7 +463,7 @@ export function GuestsDashboard() {
           <div className="border border-[#24332e]/15 bg-white p-5">
             <h2 className="font-serif text-2xl">Estado de confirmación</h2>
             <div className="mt-4 grid grid-cols-2 divide-x divide-y divide-[#24332e]/15 sm:grid-cols-4 sm:divide-y-0">
-              {[ ["Esperados", data.summary.totalPasses - data.summary.unlikelyPasses], ["Seguro no asisten", data.summary.unlikelyPasses], ["Confirmados", data.summary.confirmedPasses], ["Pendientes", data.summary.pendingPasses], ["Declinados", data.summary.declinedPasses] ].map(([label, value]) => <div key={label as string} className="px-3 py-2 first:pl-0 sm:py-0 last:pr-0"><p className="text-2xl font-semibold tabular-nums">{value}</p><p className="mt-1 text-xs leading-tight text-[#24332e]/60">{label}</p></div>)}
+              {[ ["Esperados", data.summary.totalPasses - data.summary.unlikelyPasses], ["Esperados sin confirmar", data.summary.expectedPendingPasses], ["Seguro no asisten", data.summary.unlikelyPasses], ["Confirmados", data.summary.confirmedPasses], ["Pendientes", data.summary.pendingPasses], ["Declinados", data.summary.declinedPasses] ].map(([label, value]) => <div key={label as string} className="px-3 py-2 first:pl-0 sm:py-0 last:pr-0"><p className="text-2xl font-semibold tabular-nums">{value}</p><p className="mt-1 text-xs leading-tight text-[#24332e]/60">{label}</p></div>)}
             </div>
             <div className="mt-5 border-t border-[#24332e]/15 pt-4"><div className="flex items-baseline justify-between gap-3"><p className="text-sm font-medium">Cupo confirmado</p><p className="text-sm tabular-nums">{data.summary.confirmedPasses} / {MAX_CONFIRMED_GUESTS}</p></div><div className="mt-2 h-2 overflow-hidden bg-[#e8eee8]"><div className={`h-full ${data.summary.confirmedPasses > MAX_CONFIRMED_GUESTS ? "bg-[#a04d34]" : "bg-[#27613b]"}`} style={{ width: `${Math.min((data.summary.confirmedPasses / MAX_CONFIRMED_GUESTS) * 100, 100)}%` }} /></div><p className={`mt-2 text-xs ${data.summary.confirmedPasses > MAX_CONFIRMED_GUESTS ? "text-[#a04d34]" : "text-[#24332e]/60"}`}>{data.summary.confirmedPasses > MAX_CONFIRMED_GUESTS ? `Se excedió el cupo por ${data.summary.confirmedPasses - MAX_CONFIRMED_GUESTS} invitados.` : `Quedan ${MAX_CONFIRMED_GUESTS - data.summary.confirmedPasses} cupos disponibles.`}</p></div>
           </div>
