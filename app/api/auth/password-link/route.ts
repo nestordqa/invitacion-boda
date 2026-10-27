@@ -12,12 +12,20 @@ export async function POST(request: NextRequest) {
 
   const supabase = createClient(await cookies());
   const { data: isAdmin, error: adminError } = await supabase.rpc("is_wedding_admin", { p_email: email });
-  if (adminError) return Response.json({ error: "No se pudo enviar el enlace. Inténtalo más tarde." }, { status: 500 });
+  if (adminError) {
+    console.error("[password-link] is_wedding_admin:", adminError.message);
+    return Response.json({ error: "No se pudo verificar el correo. Revisa que la migración de contraseñas esté aplicada." }, { status: 500 });
+  }
 
   if (isAdmin) {
     const redirectTo = new URL("/auth/callback?next=/dashboard/set-password", request.nextUrl.origin).toString();
     const { error } = await supabase.auth.signInWithOtp({ email, options: { shouldCreateUser: true, emailRedirectTo: redirectTo } });
-    if (error) return Response.json({ error: "No se pudo enviar el enlace. Inténtalo más tarde." }, { status: 500 });
+    if (error) {
+      console.error("[password-link] signInWithOtp:", error.status, error.code, error.message);
+      if (error.status === 429) return Response.json({ error: "Se enviaron demasiados enlaces. Espera unos minutos y vuelve a intentarlo." }, { status: 429 });
+      if (error.code === "signup_disabled") return Response.json({ error: "El registro de usuarios está desactivado en Supabase." }, { status: 500 });
+      return Response.json({ error: "No se pudo enviar el enlace. Inténtalo más tarde." }, { status: 500 });
+    }
   }
 
   return Response.json({ message: "Si tu correo está registrado, recibirás un enlace para crear tu contraseña." });
