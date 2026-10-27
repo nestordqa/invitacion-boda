@@ -2,6 +2,15 @@ import { createClient } from "@/utils/supabase/server";
 import { cookies } from "next/headers";
 import { NextRequest } from "next/server";
 
+// Dominio público del sitio. En Netlify, request.nextUrl.origin puede ser un
+// host interno o el de un despliegue concreto, que Supabase no reconoce.
+function getSiteOrigin(request: NextRequest) {
+  if (process.env.NEXT_PUBLIC_SITE_URL) return process.env.NEXT_PUBLIC_SITE_URL;
+  const host = request.headers.get("x-forwarded-host") ?? request.headers.get("host");
+  const protocol = request.headers.get("x-forwarded-proto") ?? "https";
+  return host ? `${protocol}://${host}` : request.nextUrl.origin;
+}
+
 // Envía un enlace de acceso para crear o recuperar la contraseña del dashboard.
 // Solo se envía a correos registrados como administradores de una boda, pero la
 // respuesta es siempre la misma para no revelar qué correos existen.
@@ -18,7 +27,7 @@ export async function POST(request: NextRequest) {
   }
 
   if (isAdmin) {
-    const redirectTo = new URL("/auth/callback?next=/dashboard/set-password", request.nextUrl.origin).toString();
+    const redirectTo = new URL("/auth/callback?next=/dashboard/set-password", getSiteOrigin(request)).toString();
     const { error } = await supabase.auth.signInWithOtp({ email, options: { shouldCreateUser: true, emailRedirectTo: redirectTo } });
     if (error) {
       console.error("[password-link] signInWithOtp:", error.status, error.code, error.message);
