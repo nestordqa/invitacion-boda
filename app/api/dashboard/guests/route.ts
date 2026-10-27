@@ -1,6 +1,5 @@
-import { createClient } from "@/utils/supabase/server";
+import { getDashboardContext, unauthorized } from "@/utils/dashboard";
 import { formatGuestName } from "@/utils/wedding";
-import { cookies } from "next/headers";
 import { NextRequest } from "next/server";
 
 const PAGE_SIZES = [5, 10, 20, 50];
@@ -23,7 +22,9 @@ export async function GET(request: NextRequest) {
   const status = request.nextUrl.searchParams.get("status");
   const sent = request.nextUrl.searchParams.get("sent");
   const search = request.nextUrl.searchParams.get("search")?.trim() ?? "";
-  const supabase = createClient(await cookies());
+  const dashboard = await getDashboardContext();
+  if (!dashboard) return unauthorized();
+  const { supabase } = dashboard;
   const start = (page - 1) * pageSize;
 
   const guestsQuery = supabase
@@ -75,7 +76,9 @@ export async function POST(request: NextRequest) {
     return Response.json({ error: "Ingresa un nombre y una cantidad válida de pases." }, { status: 400 });
   }
 
-  const supabase = createClient(await cookies());
+  const dashboard = await getDashboardContext();
+  if (!dashboard) return unauthorized();
+  const { supabase, weddingId, wedding } = dashboard;
   const { data: existingGuest, error: duplicateCheckError } = await supabase
     .from("guests")
     .select("id")
@@ -92,10 +95,11 @@ export async function POST(request: NextRequest) {
   }
 
   const invitationToken = crypto.randomUUID();
-  const invitationUrl = new URL(`/v2?token=${invitationToken}`, request.url).toString();
+  const invitationUrl = new URL(`${wedding.invitationPath}?token=${invitationToken}`, request.url).toString();
   const { data, error } = await supabase
     .from("guests")
     .insert({
+      wedding_id: weddingId,
       family: Boolean(body.family),
       name,
       groom_family: Boolean(body.groom_family),

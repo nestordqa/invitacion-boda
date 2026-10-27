@@ -1,6 +1,5 @@
-import { createClient } from "@/utils/supabase/server";
+import { getDashboardContext, unauthorized } from "@/utils/dashboard";
 import { formatGuestName } from "@/utils/wedding";
-import { cookies } from "next/headers";
 import { NextRequest } from "next/server";
 
 const confirmations = ["pending", "confirmed", "declined"] as const;
@@ -17,7 +16,9 @@ export async function PATCH(request: NextRequest, context: RouteContext<"/api/da
     return Response.json({ error: "Verifica el nombre, estado y cantidad de pases." }, { status: 400 });
   }
 
-  const supabase = createClient(await cookies());
+  const dashboard = await getDashboardContext();
+  if (!dashboard) return unauthorized();
+  const { supabase } = dashboard;
   const { data, error } = await supabase
     .from("guests")
     .update({
@@ -48,7 +49,9 @@ export async function DELETE(_request: NextRequest, context: RouteContext<"/api/
   const guestId = Number(id);
   if (!Number.isInteger(guestId)) return Response.json({ error: "Invitado inválido." }, { status: 400 });
 
-  const supabase = createClient(await cookies());
+  const dashboard = await getDashboardContext();
+  if (!dashboard) return unauthorized();
+  const { supabase } = dashboard;
   const { error } = await supabase.from("guests").delete().eq("id", guestId);
   if (error) return Response.json({ error: error.message }, { status: 500 });
   return new Response(null, { status: 204 });

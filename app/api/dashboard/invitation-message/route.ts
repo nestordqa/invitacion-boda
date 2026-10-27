@@ -1,9 +1,10 @@
-import { createClient } from "@/utils/supabase/server";
-import { cookies } from "next/headers";
+import { getDashboardContext, unauthorized } from "@/utils/dashboard";
 import { NextRequest } from "next/server";
 
 export async function GET() {
-  const supabase = createClient(await cookies());
+  const dashboard = await getDashboardContext();
+  if (!dashboard) return unauthorized();
+  const { supabase } = dashboard;
   const { data, error } = await supabase
     .from("invitation_message_templates")
     .select("template_type, content, updated_at")
@@ -22,10 +23,12 @@ export async function PATCH(request: NextRequest) {
     return Response.json({ error: "Ingresa un mensaje y selecciona una plantilla válida." }, { status: 400 });
   }
 
-  const supabase = createClient(await cookies());
+  const dashboard = await getDashboardContext();
+  if (!dashboard) return unauthorized();
+  const { supabase, weddingId } = dashboard;
   const { data, error } = await supabase
     .from("invitation_message_templates")
-    .upsert({ id: templateType === "standard" ? 1 : 2, template_type: templateType, content, updated_at: new Date().toISOString() }, { onConflict: "template_type" })
+    .upsert({ wedding_id: weddingId, template_type: templateType, content, updated_at: new Date().toISOString() }, { onConflict: "wedding_id,template_type" })
     .select("template_type, content, updated_at")
     .single();
 

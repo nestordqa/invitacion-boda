@@ -1,5 +1,4 @@
-import { createClient } from "@/utils/supabase/server";
-import { cookies } from "next/headers";
+import { getDashboardContext, unauthorized } from "@/utils/dashboard";
 import { NextRequest } from "next/server";
 
 export async function POST(request: NextRequest) {
@@ -8,7 +7,9 @@ export async function POST(request: NextRequest) {
   const name = typeof body.name === "string" ? body.name.trim() : "";
   if (!Number.isInteger(guestId) || !name) return Response.json({ error: "Selecciona una invitación e ingresa el nombre." }, { status: 400 });
 
-  const supabase = createClient(await cookies());
+  const dashboard = await getDashboardContext();
+  if (!dashboard) return unauthorized();
+  const { supabase } = dashboard;
   const { data: guest, error: guestError } = await supabase.from("guests").select("id, passes_number, confirmation, unlikely_to_attend").eq("id", guestId).single();
   if (guestError || !guest) return Response.json({ error: "La invitación no existe." }, { status: 404 });
   if (guest.confirmation === "declined" || (guest.confirmation === "pending" && guest.unlikely_to_attend)) return Response.json({ error: "Esta invitación no está considerada para asistir." }, { status: 409 });

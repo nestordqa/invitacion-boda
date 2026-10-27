@@ -10,6 +10,9 @@ const nextConfig: NextConfig = {
       {
         pathname: "/v2/**",
       },
+      {
+        pathname: "/v3/**",
+      },
     ],
   },
 };
