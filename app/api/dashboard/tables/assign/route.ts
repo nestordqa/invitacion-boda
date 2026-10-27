@@ -1,5 +1,4 @@
-import { createClient } from "@/utils/supabase/server";
-import { cookies } from "next/headers";
+import { getDashboardContext, unauthorized } from "@/utils/dashboard";
 import { NextRequest } from "next/server";
 
 export async function PATCH(request: NextRequest) {
@@ -8,7 +7,9 @@ export async function PATCH(request: NextRequest) {
   const tableId = body.table_id === null || body.table_id === "" ? null : Number(body.table_id);
   if (!Number.isInteger(guestId) || (tableId !== null && !Number.isInteger(tableId))) return Response.json({ error: "Invitado o mesa inválida." }, { status: 400 });
 
-  const supabase = createClient(await cookies());
+  const dashboard = await getDashboardContext();
+  if (!dashboard) return unauthorized();
+  const { supabase } = dashboard;
   const { data, error } = await supabase.from("guests").update({ table_id: tableId, updated_at: new Date().toISOString() }).eq("id", guestId).select("id, table_id").single();
   if (error) {
     const message = error.message.includes("No hay suficientes puestos") ? "No hay suficientes puestos en esta mesa" : error.message;

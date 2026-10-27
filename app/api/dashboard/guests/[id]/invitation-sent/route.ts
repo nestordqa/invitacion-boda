@@ -1,5 +1,4 @@
-import { createClient } from "@/utils/supabase/server";
-import { cookies } from "next/headers";
+import { getDashboardContext, unauthorized } from "@/utils/dashboard";
 import { NextRequest } from "next/server";
 
 export async function PATCH(request: NextRequest, context: RouteContext<"/api/dashboard/guests/[id]/invitation-sent">) {
@@ -11,7 +10,9 @@ export async function PATCH(request: NextRequest, context: RouteContext<"/api/da
     return Response.json({ error: "Estado de envío inválido." }, { status: 400 });
   }
 
-  const supabase = createClient(await cookies());
+  const dashboard = await getDashboardContext();
+  if (!dashboard) return unauthorized();
+  const { supabase } = dashboard;
   const { error } = await supabase
     .from("guests")
     .update({ invitation_sent: body.invitation_sent, updated_at: new Date().toISOString() })

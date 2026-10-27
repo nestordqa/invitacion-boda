@@ -60,7 +60,7 @@ const categoryName = (item: BudgetItem) =>
     ? item.categories[0]?.name
     : item.categories?.name;
 
-export function BudgetDashboard() {
+export function BudgetDashboard({ coupleNames }: { coupleNames: string }) {
   const [items, setItems] = useState<BudgetItem[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -356,7 +356,7 @@ export function BudgetDashboard() {
         <header className="flex flex-col gap-5 border-b border-[#24332e]/15 pb-7 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <p className="font-serif text-sm uppercase tracking-[0.2em] text-[#a04d34]">
-              Néstor & Valentina
+              {coupleNames}
             </p>
             <h1 className="mt-1 font-serif text-4xl font-medium">
               Compras y pagos
@@ -374,7 +374,7 @@ export function BudgetDashboard() {
             </button>
             <button
               onClick={openCreateModal}
-              className="inline-flex min-h-11 items-center justify-center gap-2 bg-[#24332e] px-4 text-sm font-medium text-[#f6f3ec]"
+              className="inline-flex min-h-11 rounded-lg items-center justify-center gap-2 bg-[#24332e] px-4 text-sm font-medium text-[#f6f3ec]"
             >
               <Plus className="size-4" />
               Agregar compra
@@ -382,12 +382,12 @@ export function BudgetDashboard() {
           </div>
         </header>
         {error && (
-          <p className="mt-5 border border-[#a04d34]/35 bg-[#fce9df] px-4 py-3 text-sm text-[#822f20]">
+          <p className="mt-5 rounded-lg border border-[#a04d34]/25 bg-[#fce9df] px-4 py-3 text-sm text-[#822f20]">
             {error}
           </p>
         )}
         <section className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
-          <div className="border border-[#24332e]/15 bg-white p-4">
+          <div className="rounded-2xl border border-[#24332e]/10 bg-white shadow-[0_12px_32px_-24px_rgba(36,51,46,0.45)] p-4">
             <p className="text-xs uppercase tracking-[0.08em] text-[#24332e]/60">
               Presupuesto
             </p>
@@ -395,7 +395,7 @@ export function BudgetDashboard() {
               {currency.format(totalBudget)}
             </p>
           </div>
-          <div className="border border-[#24332e]/15 bg-white p-4">
+          <div className="rounded-2xl border border-[#24332e]/10 bg-white shadow-[0_12px_32px_-24px_rgba(36,51,46,0.45)] p-4">
             <p className="text-xs uppercase tracking-[0.08em] text-[#24332e]/60">
               Pagado
             </p>
@@ -403,7 +403,7 @@ export function BudgetDashboard() {
               {currency.format(totalPaid)}
             </p>
           </div>
-          <div className="border border-[#24332e]/15 bg-white p-4">
+          <div className="rounded-2xl border border-[#24332e]/10 bg-white shadow-[0_12px_32px_-24px_rgba(36,51,46,0.45)] p-4">
             <p className="text-xs uppercase tracking-[0.08em] text-[#24332e]/60">
               Pendiente
             </p>
@@ -411,7 +411,7 @@ export function BudgetDashboard() {
               {currency.format(remaining)}
             </p>
           </div>
-          <div className="border border-[#24332e]/15 bg-white p-4">
+          <div className="rounded-2xl border border-[#24332e]/10 bg-white shadow-[0_12px_32px_-24px_rgba(36,51,46,0.45)] p-4">
             <p className="text-xs uppercase tracking-[0.08em] text-[#24332e]/60">
               Comprados
             </p>
@@ -422,7 +422,7 @@ export function BudgetDashboard() {
               </span>
             </p>
           </div>
-          <div className="border border-[#24332e]/15 bg-white p-4">
+          <div className="rounded-2xl border border-[#24332e]/10 bg-white shadow-[0_12px_32px_-24px_rgba(36,51,46,0.45)] p-4">
             <p className="text-xs uppercase tracking-[0.08em] text-[#24332e]/60">
               Pagados totalmente
             </p>
@@ -434,7 +434,7 @@ export function BudgetDashboard() {
             </p>
           </div>
         </section>
-        <section className="mt-6 border border-[#24332e]/15 bg-white p-4 sm:p-5">
+        <section className="mt-6 rounded-2xl border border-[#24332e]/10 bg-white shadow-[0_12px_32px_-24px_rgba(36,51,46,0.45)] p-4 sm:p-5">
           <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-[minmax(14rem,1fr)_auto_auto_auto_auto] xl:items-end">
             <label className="sm:col-span-2 xl:col-span-1 text-sm font-medium">
               Buscar artículo
@@ -445,7 +445,7 @@ export function BudgetDashboard() {
                   setFilters({ ...filters, search: event.target.value })
                 }
                 placeholder="Nombre del artículo"
-                className="mt-2 block min-h-10 w-full border border-[#24332e]/25 bg-white px-3 outline-none focus:border-[#a04d34]"
+                className="mt-2 block min-h-10 w-full rounded-lg border border-[#24332e]/20 bg-[#fbfaf6] transition-colors focus:bg-white px-3 outline-none focus:border-[#a04d34]"
               />
             </label>
             <label className="text-sm font-medium">
@@ -455,7 +455,7 @@ export function BudgetDashboard() {
                 onChange={(event) =>
                   setFilters({ ...filters, category: event.target.value })
                 }
-                className="mt-2 block min-h-10 w-full border border-[#24332e]/25 bg-white px-2 outline-none focus:border-[#a04d34] xl:w-40"
+                className="mt-2 block min-h-10 w-full rounded-lg border border-[#24332e]/20 bg-[#fbfaf6] transition-colors focus:bg-white px-2 outline-none focus:border-[#a04d34] xl:w-40"
               >
                 <option value="">Todas</option>
                 {categories.map((category) => (
@@ -472,7 +472,7 @@ export function BudgetDashboard() {
                 onChange={(event) =>
                   setFilters({ ...filters, supplier: event.target.value })
                 }
-                className="mt-2 block min-h-10 w-full border border-[#24332e]/25 bg-white px-2 outline-none focus:border-[#a04d34] xl:w-40"
+                className="mt-2 block min-h-10 w-full rounded-lg border border-[#24332e]/20 bg-[#fbfaf6] transition-colors focus:bg-white px-2 outline-none focus:border-[#a04d34] xl:w-40"
               >
                 <option value="">Todos</option>
                 {suppliers.map((supplier) => (
@@ -489,7 +489,7 @@ export function BudgetDashboard() {
                 onChange={(event) =>
                   setFilters({ ...filters, bought: event.target.value })
                 }
-                className="mt-2 block min-h-10 w-full border border-[#24332e]/25 bg-white px-2 outline-none focus:border-[#a04d34] xl:w-28"
+                className="mt-2 block min-h-10 w-full rounded-lg border border-[#24332e]/20 bg-[#fbfaf6] transition-colors focus:bg-white px-2 outline-none focus:border-[#a04d34] xl:w-28"
               >
                 <option value="">Todos</option>
                 <option value="true">Sí</option>
@@ -503,7 +503,7 @@ export function BudgetDashboard() {
                 onChange={(event) =>
                   setFilters({ ...filters, paid: event.target.value })
                 }
-                className="mt-2 block min-h-10 w-full border border-[#24332e]/25 bg-white px-2 outline-none focus:border-[#a04d34] xl:w-32"
+                className="mt-2 block min-h-10 w-full rounded-lg border border-[#24332e]/20 bg-[#fbfaf6] transition-colors focus:bg-white px-2 outline-none focus:border-[#a04d34] xl:w-32"
               >
                 <option value="">Todos</option>
                 <option value="true">Sí</option>
@@ -522,21 +522,21 @@ export function BudgetDashboard() {
                   });
                   setCurrentPage(1);
                 }}
-                className="min-h-10 px-3 text-sm"
+                className="min-h-10 rounded-lg px-3 text-sm"
               >
                 Limpiar
               </button>
               <button
                 type="button"
                 onClick={() => setCurrentPage(1)}
-                className="min-h-10 flex-1 bg-[#24332e] px-4 text-sm font-medium text-white xl:flex-none"
+                className="min-h-10 rounded-lg flex-1 bg-[#24332e] px-4 text-sm font-medium text-white xl:flex-none"
               >
                 Aplicar filtros
               </button>
             </div>
           </div>
         </section>
-        <section className="mt-6 overflow-hidden border border-[#24332e]/15 bg-white">
+        <section className="mt-6 overflow-hidden rounded-2xl border border-[#24332e]/10 bg-white shadow-[0_12px_32px_-24px_rgba(36,51,46,0.45)]">
           <div className="divide-y divide-[#24332e]/10 md:hidden">
             {isLoading ? (
               <p className="p-10 text-center text-sm text-[#24332e]/60">
@@ -599,14 +599,14 @@ export function BudgetDashboard() {
                       <button
                         onClick={() => openEditModal(item)}
                         title="Editar compra"
-                        className="inline-flex size-9 items-center justify-center border border-[#24332e]/20"
+                        className="inline-flex size-9 rounded-lg items-center justify-center border border-[#24332e]/20"
                       >
                         <Pencil className="size-4" />
                       </button>
                       <button
                         onClick={() => setItemToDelete(item)}
                         title="Eliminar compra"
-                        className="inline-flex size-9 items-center justify-center border border-[#a04d34]/35 text-[#a04d34]"
+                        className="inline-flex size-9 rounded-lg items-center justify-center border border-[#a04d34]/35 text-[#a04d34]"
                       >
                         <Trash2 className="size-4" />
                       </button>
@@ -618,7 +618,7 @@ export function BudgetDashboard() {
           </div>
           <div className="hidden overflow-x-auto md:block">
             <table className="w-full min-w-300 text-left text-sm">
-              <thead className="bg-[#e8eee8] text-xs uppercase tracking-[0.08em] text-[#24332e]/70">
+              <thead className="bg-[#f1f4ef] text-[11px] uppercase tracking-[0.1em] text-[#24332e]/60">
                 <tr>
                   {[
                     "Artículo",
@@ -695,14 +695,14 @@ export function BudgetDashboard() {
                           <button
                             onClick={() => openEditModal(item)}
                             title="Editar compra"
-                            className="inline-flex size-8 items-center justify-center border border-[#24332e]/20"
+                            className="inline-flex size-8 rounded-md items-center justify-center border border-[#24332e]/20"
                           >
                             <Pencil className="size-3.5" />
                           </button>
                           <button
                             onClick={() => setItemToDelete(item)}
                             title="Eliminar compra"
-                            className="inline-flex size-8 items-center justify-center border border-[#a04d34]/35 text-[#a04d34]"
+                            className="inline-flex size-8 rounded-md items-center justify-center border border-[#a04d34]/35 text-[#a04d34]"
                           >
                             <Trash2 className="size-3.5" />
                           </button>
@@ -725,7 +725,7 @@ export function BudgetDashboard() {
                 setPageSize(nextPageSize);
                 setCurrentPage(1);
               }}
-              className="min-h-9 border border-[#24332e]/25 bg-white px-2 outline-none"
+              className="min-h-9 rounded-lg border border-[#24332e]/20 bg-[#fbfaf6] transition-colors focus:bg-white px-2 outline-none"
             >
               <option value="5">5</option>
               <option value="10">10</option>
@@ -742,7 +742,7 @@ export function BudgetDashboard() {
               aria-label="Página anterior"
               disabled={currentPage === 1}
               onClick={() => setCurrentPage((page) => page - 1)}
-              className="inline-flex size-9 items-center justify-center border border-[#24332e]/20 disabled:opacity-35"
+              className="inline-flex size-9 rounded-lg items-center justify-center border border-[#24332e]/20 disabled:opacity-35"
             >
               <ChevronLeft className="size-4" />
             </button>
@@ -750,7 +750,7 @@ export function BudgetDashboard() {
               aria-label="Página siguiente"
               disabled={currentPage >= totalPages}
               onClick={() => setCurrentPage((page) => page + 1)}
-              className="inline-flex size-9 items-center justify-center border border-[#24332e]/20 disabled:opacity-35"
+              className="inline-flex size-9 rounded-lg items-center justify-center border border-[#24332e]/20 disabled:opacity-35"
             >
               <ChevronRight className="size-4" />
             </button>
@@ -785,7 +785,7 @@ export function BudgetDashboard() {
                   type="button"
                   onClick={() => setIsItemModalOpen(false)}
                   aria-label="Cerrar modal"
-                  className="inline-flex size-9 items-center justify-center border border-[#24332e]/20"
+                  className="inline-flex size-9 rounded-lg items-center justify-center border border-[#24332e]/20"
                 >
                   <X className="size-4" />
                 </button>
@@ -799,7 +799,7 @@ export function BudgetDashboard() {
                     onChange={(event) =>
                       setForm({ ...form, item: event.target.value })
                     }
-                    className="mt-2 min-h-11 w-full border border-[#24332e]/25 bg-white px-3 outline-none"
+                    className="mt-2 min-h-11 w-full rounded-lg border border-[#24332e]/20 bg-[#fbfaf6] transition-colors focus:bg-white px-3 outline-none"
                   />
                 </label>
                 <label className="sm:col-span-2 text-sm font-medium">
@@ -808,7 +808,7 @@ export function BudgetDashboard() {
                     value={form.description}
                     onChange={(event) => setForm({ ...form, description: event.target.value })}
                     rows={3}
-                    className="mt-2 w-full border border-[#24332e]/25 bg-white p-3 outline-none"
+                    className="mt-2 w-full rounded-lg border border-[#24332e]/20 bg-[#fbfaf6] transition-colors focus:bg-white p-3 outline-none"
                   />
                 </label>
                 <label className="text-sm font-medium">
@@ -821,7 +821,7 @@ export function BudgetDashboard() {
                       setForm({ ...form, categoryName: event.target.value })
                     }
                     placeholder="Buscar categoría"
-                    className="mt-2 min-h-11 w-full border border-[#24332e]/25 bg-white px-3 outline-none"
+                    className="mt-2 min-h-11 w-full rounded-lg border border-[#24332e]/20 bg-[#fbfaf6] transition-colors focus:bg-white px-3 outline-none"
                   />
                   <datalist id="budget-categories">
                     {categories.map((category) => (
@@ -845,7 +845,7 @@ export function BudgetDashboard() {
                     onChange={(event) =>
                       setForm({ ...form, supplier: event.target.value })
                     }
-                    className="mt-2 min-h-11 w-full border border-[#24332e]/25 bg-white px-3 outline-none"
+                    className="mt-2 min-h-11 w-full rounded-lg border border-[#24332e]/20 bg-[#fbfaf6] transition-colors focus:bg-white px-3 outline-none"
                   />
                 </label>
                 <label className="text-sm font-medium">
@@ -859,7 +859,7 @@ export function BudgetDashboard() {
                     onChange={(event) =>
                       setForm({ ...form, quantity: Number(event.target.value) })
                     }
-                    className="mt-2 min-h-11 w-full border border-[#24332e]/25 bg-white px-3 outline-none"
+                    className="mt-2 min-h-11 w-full rounded-lg border border-[#24332e]/20 bg-[#fbfaf6] transition-colors focus:bg-white px-3 outline-none"
                   />
                 </label>
                 <label className="text-sm font-medium">
@@ -879,7 +879,7 @@ export function BudgetDashboard() {
                             : Number(event.target.value),
                       })
                     }
-                    className="mt-2 min-h-11 w-full border border-[#24332e]/25 bg-white px-3 outline-none"
+                    className="mt-2 min-h-11 w-full rounded-lg border border-[#24332e]/20 bg-[#fbfaf6] transition-colors focus:bg-white px-3 outline-none"
                   />
                 </label>
                 <label className="text-sm font-medium">
@@ -899,7 +899,7 @@ export function BudgetDashboard() {
                             : Number(event.target.value),
                       })
                     }
-                    className="mt-2 min-h-11 w-full border border-[#24332e]/25 bg-white px-3 outline-none"
+                    className="mt-2 min-h-11 w-full rounded-lg border border-[#24332e]/20 bg-[#fbfaf6] transition-colors focus:bg-white px-3 outline-none"
                   />
                 </label>
                 <p className="self-end pb-3 text-sm">
@@ -972,7 +972,7 @@ export function BudgetDashboard() {
                   type="button"
                   onClick={() => setIsCategoryModalOpen(false)}
                   aria-label="Cerrar modal"
-                  className="inline-flex size-9 items-center justify-center border border-[#24332e]/20"
+                  className="inline-flex size-9 rounded-lg items-center justify-center border border-[#24332e]/20"
                 >
                   <X className="size-4" />
                 </button>
@@ -988,7 +988,7 @@ export function BudgetDashboard() {
                       name: event.target.value,
                     })
                   }
-                  className="mt-2 min-h-11 w-full border border-[#24332e]/25 bg-white px-3 outline-none"
+                  className="mt-2 min-h-11 w-full rounded-lg border border-[#24332e]/20 bg-[#fbfaf6] transition-colors focus:bg-white px-3 outline-none"
                 />
               </label>
               <label className="mt-5 block text-sm font-medium">
@@ -1002,7 +1002,7 @@ export function BudgetDashboard() {
                     })
                   }
                   rows={3}
-                  className="mt-2 w-full border border-[#24332e]/25 bg-white p-3 outline-none"
+                  className="mt-2 w-full rounded-lg border border-[#24332e]/20 bg-[#fbfaf6] transition-colors focus:bg-white p-3 outline-none"
                 />
               </label>
               <div className="mt-6 flex justify-end gap-3">
@@ -1026,7 +1026,7 @@ export function BudgetDashboard() {
         {descriptionItem && (
           <div role="dialog" aria-modal="true" aria-labelledby="description-modal-title" className="fixed inset-0 z-60 grid place-items-center bg-[#18231f]/55 p-4">
             <div className="w-full max-w-lg bg-[#fdfcf8] p-6 shadow-2xl sm:p-8">
-              <div className="flex items-start justify-between gap-4 border-b border-[#24332e]/15 pb-5"><div><p className="text-xs uppercase tracking-[0.14em] text-[#a04d34]">Descripción</p><h2 id="description-modal-title" className="mt-1 font-serif text-3xl">{descriptionItem.item}</h2></div><button type="button" onClick={() => setDescriptionItem(null)} aria-label="Cerrar descripción" className="inline-flex size-9 shrink-0 items-center justify-center border border-[#24332e]/20"><X className="size-4" /></button></div>
+              <div className="flex items-start justify-between gap-4 border-b border-[#24332e]/15 pb-5"><div><p className="text-xs uppercase tracking-[0.14em] text-[#a04d34]">Descripción</p><h2 id="description-modal-title" className="mt-1 font-serif text-3xl">{descriptionItem.item}</h2></div><button type="button" onClick={() => setDescriptionItem(null)} aria-label="Cerrar descripción" className="inline-flex size-9 rounded-lg shrink-0 items-center justify-center border border-[#24332e]/20"><X className="size-4" /></button></div>
               <p className="mt-6 whitespace-pre-wrap text-sm leading-relaxed text-[#24332e]/80">{descriptionItem.description}</p>
               <div className="mt-7 flex justify-end"><button type="button" onClick={() => setDescriptionItem(null)} className="min-h-11 bg-[#24332e] px-5 text-sm font-medium text-white">Cerrar</button></div>
             </div>

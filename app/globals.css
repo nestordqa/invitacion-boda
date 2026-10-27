@@ -93,3 +93,37 @@ body {
 .music-btn-pulse {
   animation: music-btn-pulse 2.2s ease-in-out infinite;
 }
+/* Invitación V3: pétalos que caen, ramas que se dibujan y balanceo suave. */
+@keyframes v3-petal-fall {
+  0% { transform: translate3d(0, -10vh, 0) rotate(0deg); opacity: 0; }
+  10% { opacity: 0.9; }
+  50% { transform: translate3d(28px, 45vh, 0) rotate(160deg); }
+  90% { opacity: 0.8; }
+  100% { transform: translate3d(-18px, 105vh, 0) rotate(320deg); opacity: 0; }
+}
+
+@keyframes v3-draw {
+  from { stroke-dashoffset: 400; }
+  to { stroke-dashoffset: 0; }
+}
+
+@keyframes v3-sway {
+  0%, 100% { transform: rotate(-2.5deg); }
+  50% { transform: rotate(2.5deg); }
+}
+
+@keyframes v3-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+.v3-petal { animation: v3-petal-fall linear infinite; }
+.v3-draw path { stroke-dasharray: 400; stroke-dashoffset: 400; animation: v3-draw 2.6s ease-out forwards; }
+.v3-sway { transform-origin: bottom center; animation: v3-sway 6s ease-in-out infinite; }
+.v3-float { animation: v3-float 6s ease-in-out infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .v3-petal { display: none; }
+  .v3-draw path { animation: none; stroke-dashoffset: 0; }
+  .v3-sway, .v3-float { animation: none; }
+}

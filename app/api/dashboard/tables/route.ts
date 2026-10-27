@@ -1,5 +1,4 @@
-import { createClient } from "@/utils/supabase/server";
-import { cookies } from "next/headers";
+import { getDashboardContext, unauthorized } from "@/utils/dashboard";
 import { NextRequest } from "next/server";
 
 const guestFields = "id, name, passes_number, used_passes_confirmed, confirmation, groom_family, bride_family, friend, unlikely_to_attend";
@@ -9,7 +8,9 @@ function canBeAssigned(guest: { confirmation: string; unlikely_to_attend: boolea
 }
 
 export async function GET() {
-  const supabase = createClient(await cookies());
+  const dashboard = await getDashboardContext();
+  if (!dashboard) return unauthorized();
+  const { supabase } = dashboard;
   const [{ data: tables, error: tablesError }, { data: guests, error: guestsError }, { data: members, error: membersError }] = await Promise.all([
     supabase.from("wedding_tables").select("id, name, created_at").order("created_at", { ascending: true }),
     supabase.from("guests").select(guestFields).order("name", { ascending: true }),
@@ -43,7 +44,9 @@ export async function POST(request: NextRequest) {
   const name = typeof body.name === "string" ? body.name.trim() : "";
   if (!name) return Response.json({ error: "Ingresa un nombre para la mesa." }, { status: 400 });
 
-  const supabase = createClient(await cookies());
+  const dashboard = await getDashboardContext();
+  if (!dashboard) return unauthorized();
+  const { supabase } = dashboard;
   const { data, error } = await supabase.from("wedding_tables").insert({ name }).select("id, name, created_at").single();
   if (error) return Response.json({ error: error.message }, { status: 500 });
   return Response.json({ table: { ...data, members: [] } }, { status: 201 });
