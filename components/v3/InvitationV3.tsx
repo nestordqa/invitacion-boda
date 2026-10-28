@@ -123,7 +123,7 @@ export function InvitationV3({ guest, token, rsvpDeadline, rsvpOpen }: Invitatio
           ))}
         </section>
 
-        <section id="familias" className="border-t border-[#c9cdb8] px-3 pt-12 pb-14 text-center sm:px-6">
+        {/* <section id="familias" className="border-t border-[#c9cdb8] px-3 pt-12 pb-14 text-center sm:px-6">
           <p className="font-sans text-[11px] font-bold uppercase tracking-[0.22em] text-[#687653]">{t.familiesEyebrow}</p>
           <h2 className="mt-2.5 font-(family-name:--font-script) text-[2.6rem] leading-tight text-[#465438] sm:text-6xl">{t.familiesTitle}</h2>
           <Image src="/v3/family-dogs.jpg" alt="Benito, nuestro schnauzer negro, y Nala, nuestra golden doodle dorada" width={2170} height={725} className="mx-auto mt-1 mb-2 h-auto w-full mix-blend-multiply" />
@@ -131,7 +131,7 @@ export function InvitationV3({ guest, token, rsvpDeadline, rsvpOpen }: Invitatio
             {t.familiesText.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
             <p className="italic">{t.familiesClosing}</p>
           </div>
-        </section>
+        </section> */}
 
         <Section id="vestimenta" eyebrow={t.dressEyebrow} title={t.dressTitle}>
           <Image src="/v3/dancing.webp" alt="Ilustración de Gabriel y Vanessa bailando" width={722} height={760} className="mx-auto mt-2 mb-5 h-auto max-h-80 w-auto mix-blend-multiply" />
@@ -200,6 +200,7 @@ export function InvitationV3({ guest, token, rsvpDeadline, rsvpOpen }: Invitatio
         </Section>
 
         <Section id="rsvp" eyebrow={t.rsvpEyebrow} title={t.rsvpTitle}>
+          <Image src="/v3/family-dogs.jpg" alt="Benito, nuestro schnauzer negro, y Nala, nuestra golden doodle dorada" width={2170} height={725} className="mx-auto mb-4 h-auto w-full max-w-xl mix-blend-multiply" />
           <RsvpFormV3 t={t} guest={guest} token={token} deadlineLabel={formatDeadline(rsvpDeadline, lang)} rsvpOpen={rsvpOpen} />
         </Section>
 
