@@ -157,7 +157,7 @@ export function InvitationV3({ guest, token, rsvpDeadline, rsvpOpen }: Invitatio
 
         <Section id="regalos" eyebrow={t.giftsEyebrow} title={t.giftsTitle}>
           <Image src="/v3/gift.webp" alt="" width={160} height={195} className="mx-auto mb-3 h-32 w-auto mix-blend-multiply" />
-          <p className="mx-auto max-w-lg text-xl leading-relaxed">{t.giftsText}</p>
+          <p className="mx-auto max-w-lg whitespace-pre-line text-xl leading-relaxed">{t.giftsText}</p>
           <div className="mx-auto mt-7 grid max-w-xl gap-3 sm:grid-cols-3">
             {GIFT_ACCOUNTS.map((account) => (
               <div key={account.label} className="flex flex-col items-center border border-[#c9cdb8] bg-[#fffdf6]/60 px-3 py-4">

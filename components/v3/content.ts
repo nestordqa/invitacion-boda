@@ -17,7 +17,7 @@ export const HOTELS = [
 
 export const content = {
   es: {
-    eyebrow: "¡Con mucha ilusión, les invitamos a…",
+    eyebrow: "Con mucha ilusión, les invitamos a…",
     ourWedding: "¡Nuestra boda!",
     date: "6 de marzo de 2027",
     tagline: "Un día, mil recuerdos y la alegría de compartirlo con ustedes.",
@@ -43,7 +43,7 @@ export const content = {
     code: "Código",
     giftsEyebrow: "Un detalle de corazón",
     giftsTitle: "Regalos",
-    giftsText: "Su compañía es nuestro mejor regalo. Si además les apetece tener un detalle con nosotros, pueden hacernos una aportación a cualquiera de estas cuentas. ¡Gracias de corazón!",
+    giftsText: "Su compañía es nuestro mejor regalo. ❤️\n\nSi además desean tener un detalle con nosotros, pueden hacerlo mediante una aportación a cualquiera de las cuentas bancarias que encontrarán aquí o, si lo prefieren, en efectivo el día de la boda.\n\n¡Gracias de corazón por acompañarnos en un día tan especial! 💚",
     copy: "Copiar",
     copied: "Copiado",
     rsvpEyebrow: "Necesitamos saber",
@@ -114,7 +114,7 @@ export const content = {
     code: "Code",
     giftsEyebrow: "A gift from the heart",
     giftsTitle: "Gifts",
-    giftsText: "Having you with us is the greatest gift. If you would also like to give us something, you are welcome to contribute to any of these accounts. Thank you from the bottom of our hearts!",
+    giftsText: "Having you with us is the greatest gift. ❤️\n\nIf you would also like to give us something, you are welcome to contribute to any of the bank accounts below or, if you prefer, in cash on the wedding day.\n\nThank you from the bottom of our hearts for joining us on such a special day! 💚",
     copy: "Copy",
     copied: "Copied",
     rsvpEyebrow: "Please let us know",

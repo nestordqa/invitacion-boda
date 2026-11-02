@@ -4,6 +4,7 @@ import { getWeddingInvitation } from "@/utils/invitation";
 import { WEDDINGS, isWeddingRsvpOpen } from "@/utils/wedding";
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://gabriel-and-vanessa.netlify.app"),
   title: "Gabriel & Vanessa · 6 de marzo de 2027",
   description: "Invitación de boda de Gabriel y Vanessa · 6 de marzo de 2027",
 };
