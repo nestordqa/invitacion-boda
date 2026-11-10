@@ -27,6 +27,7 @@ export async function PATCH(request: NextRequest, context: RouteContext<"/api/da
       groom_family: Boolean(body.groom_family),
       bride_family: Boolean(body.bride_family),
       friend: Boolean(body.friend),
+      coworker: Boolean(body.coworker),
       confirmation: body.confirmation,
       passes_number: passesNumber,
       used_passes_confirmed: usedPasses,

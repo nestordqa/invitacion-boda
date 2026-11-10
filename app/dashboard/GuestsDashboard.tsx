@@ -12,6 +12,7 @@ type Guest = {
   groom_family: boolean;
   bride_family: boolean;
   friend: boolean;
+  coworker: boolean;
   confirmation: "pending" | "confirmed" | "declined";
   passes_number: number;
   used_passes_confirmed: number;
@@ -28,6 +29,7 @@ type GuestSummary = {
   groomFamilyPasses: number;
   brideFamilyPasses: number;
   friendPasses: number;
+  coworkerPasses: number;
   confirmedPasses: number;
   pendingPasses: number;
   expectedPendingPasses: number;
@@ -39,7 +41,7 @@ type GuestSummary = {
 type GuestsResponse = { guests: Guest[]; page: number; pageSize: number; total: number; summary: GuestSummary; error?: string };
 
 type GuestFilters = {
-  relationships: Array<"groom_family" | "bride_family" | "friend">;
+  relationships: Array<"groom_family" | "bride_family" | "friend" | "coworker">;
   status: "" | Guest["confirmation"];
   sent: "" | "true" | "false";
   search: string;
@@ -55,6 +57,7 @@ type GuestForm = {
   groom_family: boolean;
   bride_family: boolean;
   friend: boolean;
+  coworker: boolean;
   internal_observation: string;
   unlikely_to_attend: boolean;
   is_abroad: boolean;
@@ -70,6 +73,7 @@ const initialForm: GuestForm = {
   groom_family: false,
   bride_family: false,
   friend: false,
+  coworker: false,
   internal_observation: "",
   unlikely_to_attend: false,
   is_abroad: false,
@@ -96,6 +100,7 @@ function updateSummary(summary: GuestSummary, guest: Guest, direction: 1 | -1) {
     groomFamilyPasses: summary.groomFamilyPasses + (guest.groom_family ? direction * guest.passes_number : 0),
     brideFamilyPasses: summary.brideFamilyPasses + (guest.bride_family ? direction * guest.passes_number : 0),
     friendPasses: summary.friendPasses + (guest.friend ? direction * guest.passes_number : 0),
+    coworkerPasses: summary.coworkerPasses + (guest.coworker ? direction * guest.passes_number : 0),
     confirmedPasses: summary.confirmedPasses + direction * confirmedPasses,
     pendingPasses: summary.pendingPasses + (guest.confirmation === "pending" ? direction * guest.passes_number : 0),
     expectedPendingPasses: summary.expectedPendingPasses + (guest.confirmation === "pending" && !guest.unlikely_to_attend ? direction * guest.passes_number : 0),
@@ -108,7 +113,7 @@ function updateSummary(summary: GuestSummary, guest: Guest, direction: 1 | -1) {
 type GuestsDashboardProps = { coupleNames: string; maxConfirmedGuests: number };
 
 export function GuestsDashboard({ coupleNames, maxConfirmedGuests }: GuestsDashboardProps) {
-  const [data, setData] = useState<GuestsResponse>({ guests: [], page: 1, pageSize: 10, total: 0, summary: { totalPasses: 0, groomFamilyPasses: 0, brideFamilyPasses: 0, friendPasses: 0, confirmedPasses: 0, pendingPasses: 0, expectedPendingPasses: 0, declinedPasses: 0, unlikelyGuests: 0, unlikelyPasses: 0 } });
+  const [data, setData] = useState<GuestsResponse>({ guests: [], page: 1, pageSize: 10, total: 0, summary: { totalPasses: 0, groomFamilyPasses: 0, brideFamilyPasses: 0, friendPasses: 0, coworkerPasses: 0, confirmedPasses: 0, pendingPasses: 0, expectedPendingPasses: 0, declinedPasses: 0, unlikelyGuests: 0, unlikelyPasses: 0 } });
   const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [form, setForm] = useState(initialForm);
@@ -267,6 +272,7 @@ export function GuestsDashboard({ coupleNames, maxConfirmedGuests }: GuestsDashb
       groom_family: guest.groom_family,
       bride_family: guest.bride_family,
       friend: guest.friend,
+      coworker: guest.coworker,
       internal_observation: guest.internal_observation || "",
       unlikely_to_attend: guest.unlikely_to_attend,
       is_abroad: guest.is_abroad,
@@ -367,6 +373,7 @@ export function GuestsDashboard({ coupleNames, maxConfirmedGuests }: GuestsDashb
     form.groom_family !== editingGuest.groom_family ||
     form.bride_family !== editingGuest.bride_family ||
     form.friend !== editingGuest.friend ||
+    form.coworker !== editingGuest.coworker ||
     form.internal_observation !== (editingGuest.internal_observation || "") ||
     form.unlikely_to_attend !== editingGuest.unlikely_to_attend ||
     form.is_abroad !== editingGuest.is_abroad;
@@ -399,7 +406,7 @@ export function GuestsDashboard({ coupleNames, maxConfirmedGuests }: GuestsDashb
             <label className="sm:col-span-2 xl:col-span-1 text-sm font-medium">Buscar invitado<input type="search" value={filters.search} onChange={(event) => setFilters({ ...filters, search: event.target.value })} onKeyDown={(event) => { if (event.key === "Enter") void loadGuests(1); }} placeholder="Nombre del invitado" className="mt-2 block min-h-10 w-full rounded-lg border border-[#24332e]/20 bg-[#fbfaf6] transition-colors focus:bg-white px-3 outline-none focus:border-[#a04d34]" /></label>
             <fieldset className="sm:col-span-2 xl:col-span-1">
               <legend className="text-xs font-semibold uppercase tracking-[0.08em] text-[#24332e]/65">Vínculo</legend>
-              <div className="mt-2 flex flex-wrap gap-3">{([ ["groom_family", "Familia novio"], ["bride_family", "Familia novia"], ["friend", "Amigo"] ] as const).map(([value, label]) => <label key={value} className="flex min-h-9 items-center gap-2 text-sm"><input type="checkbox" checked={filters.relationships.includes(value)} onChange={(event) => setFilters({ ...filters, relationships: event.target.checked ? [...filters.relationships, value] : filters.relationships.filter((relationship) => relationship !== value) })} className="size-4 accent-[#a04d34]" />{label}</label>)}</div>
+              <div className="mt-2 flex flex-wrap gap-3">{([ ["groom_family", "Familia novio"], ["bride_family", "Familia novia"], ["friend", "Amigo"], ["coworker", "Compañero de trabajo"] ] as const).map(([value, label]) => <label key={value} className="flex min-h-9 items-center gap-2 text-sm"><input type="checkbox" checked={filters.relationships.includes(value)} onChange={(event) => setFilters({ ...filters, relationships: event.target.checked ? [...filters.relationships, value] : filters.relationships.filter((relationship) => relationship !== value) })} className="size-4 accent-[#a04d34]" />{label}</label>)}</div>
             </fieldset>
             <label className="text-sm font-medium">Estado<select value={filters.status} onChange={(event) => setFilters({ ...filters, status: event.target.value as GuestFilters["status"] })} className="mt-2 block min-h-10 w-full rounded-lg border border-[#24332e]/20 bg-[#fbfaf6] transition-colors focus:bg-white px-2 outline-none focus:border-[#a04d34] xl:w-36"><option value="">Todos</option><option value="pending">Pendiente</option><option value="confirmed">Confirmado</option><option value="declined">Declinó</option></select></label>
             <label className="text-sm font-medium">Enviada<select value={filters.sent} onChange={(event) => setFilters({ ...filters, sent: event.target.value as GuestFilters["sent"] })} className="mt-2 block min-h-10 w-full rounded-lg border border-[#24332e]/20 bg-[#fbfaf6] transition-colors focus:bg-white px-2 outline-none focus:border-[#a04d34] xl:w-28"><option value="">Todas</option><option value="true">Sí</option><option value="false">No</option></select></label>
@@ -409,7 +416,7 @@ export function GuestsDashboard({ coupleNames, maxConfirmedGuests }: GuestsDashb
 
         <section className="mt-7 overflow-hidden rounded-2xl border border-[#24332e]/10 bg-white shadow-[0_12px_32px_-24px_rgba(36,51,46,0.45)]">
           <div className="divide-y divide-[#24332e]/10 md:hidden">
-            {isLoading ? <p className="px-4 py-12 text-center text-sm text-[#24332e]/60">Cargando invitados...</p> : data.guests.length === 0 ? <p className="px-4 py-12 text-center text-sm text-[#24332e]/60">Aún no hay invitados registrados.</p> : data.guests.map((guest) => <article key={guest.id} className="p-4"><div className="flex items-start justify-between gap-3"><div><h2 className="font-serif text-xl font-medium">{guest.name}</h2><p className="mt-1 text-xs text-[#24332e]/60">{guest.used_passes_confirmed} de {guest.passes_number} pases confirmados</p></div><span className={`shrink-0 px-2 py-1 text-xs ${guest.confirmation === "confirmed" ? "bg-[#dfece0] text-[#27613b]" : guest.confirmation === "declined" ? "bg-[#f6dfd8] text-[#8d3024]" : "bg-[#f3e8ca] text-[#765913]"}`}>{statusLabels[guest.confirmation]}</span></div><dl className="mt-4 grid grid-cols-2 gap-x-4 gap-y-3 text-sm"><div><dt className="text-xs uppercase tracking-[0.08em] text-[#24332e]/55">Vínculo</dt><dd className="mt-1">{guest.groom_family ? "Familia novio" : guest.bride_family ? "Familia novia" : guest.friend ? "Amigo/a" : "Sin definir"}</dd></div><div><dt className="text-xs uppercase tracking-[0.08em] text-[#24332e]/55">Es una familia</dt><dd className="mt-1">{guest.family ? "Sí" : "No"}</dd></div>{guest.guest_observation && <div className="col-span-2"><dt className="text-xs uppercase tracking-[0.08em] text-[#24332e]/55">Observación</dt><dd className="mt-1 text-[#24332e]/75">{guest.guest_observation}</dd></div>}</dl><div className="mt-4 flex items-center justify-between gap-3 border-t border-[#24332e]/10 pt-3"><label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={guest.invitation_sent} disabled={updatingInvitationId === guest.id} onChange={(event) => void updateInvitationSent(guest, event.target.checked)} className="size-4 accent-[#27613b]" />Enviada</label><div className="flex gap-2"><button onClick={() => void copyUrl(guest.invitation_url)} title="Copiar URL de invitación" className="inline-flex size-9 rounded-lg items-center justify-center border border-[#24332e]/20"><Copy className="size-4" /></button><button onClick={() => openEditModal(guest)} title="Editar invitado" className="inline-flex size-9 rounded-lg items-center justify-center border border-[#24332e]/20"><Pencil className="size-4" /></button><button onClick={() => setGuestToDelete(guest)} title="Eliminar invitado" className="inline-flex size-9 rounded-lg items-center justify-center border border-[#a04d34]/35 text-[#a04d34]"><Trash2 className="size-4" /></button></div></div></article>)}
+            {isLoading ? <p className="px-4 py-12 text-center text-sm text-[#24332e]/60">Cargando invitados...</p> : data.guests.length === 0 ? <p className="px-4 py-12 text-center text-sm text-[#24332e]/60">Aún no hay invitados registrados.</p> : data.guests.map((guest) => <article key={guest.id} className="p-4"><div className="flex items-start justify-between gap-3"><div><h2 className="font-serif text-xl font-medium">{guest.name}</h2><p className="mt-1 text-xs text-[#24332e]/60">{guest.used_passes_confirmed} de {guest.passes_number} pases confirmados</p></div><span className={`shrink-0 px-2 py-1 text-xs ${guest.confirmation === "confirmed" ? "bg-[#dfece0] text-[#27613b]" : guest.confirmation === "declined" ? "bg-[#f6dfd8] text-[#8d3024]" : "bg-[#f3e8ca] text-[#765913]"}`}>{statusLabels[guest.confirmation]}</span></div><dl className="mt-4 grid grid-cols-2 gap-x-4 gap-y-3 text-sm"><div><dt className="text-xs uppercase tracking-[0.08em] text-[#24332e]/55">Vínculo</dt><dd className="mt-1">{guest.groom_family ? "Familia novio" : guest.bride_family ? "Familia novia" : guest.friend ? "Amigo/a" : guest.coworker ? "Compañero de trabajo" : "Sin definir"}</dd></div><div><dt className="text-xs uppercase tracking-[0.08em] text-[#24332e]/55">Es una familia</dt><dd className="mt-1">{guest.family ? "Sí" : "No"}</dd></div>{guest.guest_observation && <div className="col-span-2"><dt className="text-xs uppercase tracking-[0.08em] text-[#24332e]/55">Observación</dt><dd className="mt-1 text-[#24332e]/75">{guest.guest_observation}</dd></div>}</dl><div className="mt-4 flex items-center justify-between gap-3 border-t border-[#24332e]/10 pt-3"><label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={guest.invitation_sent} disabled={updatingInvitationId === guest.id} onChange={(event) => void updateInvitationSent(guest, event.target.checked)} className="size-4 accent-[#27613b]" />Enviada</label><div className="flex gap-2"><button onClick={() => void copyUrl(guest.invitation_url)} title="Copiar URL de invitación" className="inline-flex size-9 rounded-lg items-center justify-center border border-[#24332e]/20"><Copy className="size-4" /></button><button onClick={() => openEditModal(guest)} title="Editar invitado" className="inline-flex size-9 rounded-lg items-center justify-center border border-[#24332e]/20"><Pencil className="size-4" /></button><button onClick={() => setGuestToDelete(guest)} title="Eliminar invitado" className="inline-flex size-9 rounded-lg items-center justify-center border border-[#a04d34]/35 text-[#a04d34]"><Trash2 className="size-4" /></button></div></div></article>)}
           </div>
           <div className="hidden overflow-x-auto md:block">
             <table className="w-full min-w-280 border-collapse text-left text-sm">
@@ -451,7 +458,7 @@ export function GuestsDashboard({ coupleNames, maxConfirmedGuests }: GuestsDashb
           <div className="rounded-2xl border border-[#24332e]/10 bg-white shadow-[0_12px_32px_-24px_rgba(36,51,46,0.45)] p-5">
             <h2 className="font-serif text-2xl">Pases por vínculo</h2>
             <div className="mt-4 grid grid-cols-3 divide-x divide-[#24332e]/15">
-              {[ ["Familia del novio", data.summary.groomFamilyPasses], ["Familia de la novia", data.summary.brideFamilyPasses], ["Amigos", data.summary.friendPasses] ].map(([label, value]) => <div key={label as string} className="px-3 first:pl-0 last:pr-0"><p className="text-2xl font-semibold tabular-nums">{value}</p><p className="mt-1 text-xs leading-tight text-[#24332e]/60">{label}</p></div>)}
+              {[ ["Familia del novio", data.summary.groomFamilyPasses], ["Familia de la novia", data.summary.brideFamilyPasses], ["Amigos", data.summary.friendPasses], ["Compañeros de trabajo", data.summary.coworkerPasses] ].map(([label, value]) => <div key={label as string} className="px-3 first:pl-0 last:pr-0"><p className="text-2xl font-semibold tabular-nums">{value}</p><p className="mt-1 text-xs leading-tight text-[#24332e]/60">{label}</p></div>)}
             </div>
           </div>
           <div className="rounded-2xl border border-[#24332e]/10 bg-white shadow-[0_12px_32px_-24px_rgba(36,51,46,0.45)] p-5">
@@ -499,7 +506,7 @@ export function GuestsDashboard({ coupleNames, maxConfirmedGuests }: GuestsDashb
               <label className="flex min-h-11 items-center gap-3 border border-[#24332e]/15 px-3 text-sm"><input type="checkbox" checked={form.family} onChange={(event) => setForm({ ...form, family: event.target.checked })} className="size-4 accent-[#a04d34]" />¿Es una familia?</label>
               <label className="flex min-h-11 items-center gap-3 border border-[#e5c94a]/50 bg-[#fff8d9] px-3 text-sm sm:col-span-2"><input type="checkbox" checked={form.unlikely_to_attend} onChange={(event) => setForm({ ...form, unlikely_to_attend: event.target.checked })} className="size-4 accent-[#a04d34]" />Muy probable que no asista</label>
               <label className="flex min-h-11 items-center gap-3 border border-[#24332e]/15 px-3 text-sm sm:col-span-2"><input type="checkbox" checked={form.is_abroad} onChange={(event) => setForm({ ...form, is_abroad: event.target.checked })} className="size-4 accent-[#a04d34]" />Invitado en el exterior</label>
-              <fieldset className="sm:col-span-2"><legend className="text-sm font-medium">Vínculo</legend><div className="mt-2 grid gap-2 sm:grid-cols-4"><label className="flex min-h-11 items-center gap-2 border border-[#24332e]/15 px-3 text-sm"><input type="radio" name="relationship" checked={!form.groom_family && !form.bride_family && !form.friend} onChange={() => setForm({ ...form, groom_family: false, bride_family: false, friend: false })} className="size-4 accent-[#a04d34]" />Sin definir</label><label className="flex min-h-11 items-center gap-2 border border-[#24332e]/15 px-3 text-sm"><input type="radio" name="relationship" checked={form.groom_family} onChange={() => setForm({ ...form, groom_family: true, bride_family: false, friend: false })} className="size-4 accent-[#a04d34]" />Familia del novio</label><label className="flex min-h-11 items-center gap-2 border border-[#24332e]/15 px-3 text-sm"><input type="radio" name="relationship" checked={form.bride_family} onChange={() => setForm({ ...form, groom_family: false, bride_family: true, friend: false })} className="size-4 accent-[#a04d34]" />Familia de la novia</label><label className="flex min-h-11 items-center gap-2 border border-[#24332e]/15 px-3 text-sm"><input type="radio" name="relationship" checked={form.friend} onChange={() => setForm({ ...form, groom_family: false, bride_family: false, friend: true })} className="size-4 accent-[#a04d34]" />Amigo/a</label></div></fieldset>
+              <fieldset className="sm:col-span-2"><legend className="text-sm font-medium">Vínculo</legend><div className="mt-2 grid gap-2 sm:grid-cols-5"><label className="flex min-h-11 items-center gap-2 border border-[#24332e]/15 px-3 text-sm"><input type="radio" name="relationship" checked={!form.groom_family && !form.bride_family && !form.friend && !form.coworker} onChange={() => setForm({ ...form, groom_family: false, bride_family: false, friend: false, coworker: false })} className="size-4 accent-[#a04d34]" />Sin definir</label><label className="flex min-h-11 items-center gap-2 border border-[#24332e]/15 px-3 text-sm"><input type="radio" name="relationship" checked={form.groom_family} onChange={() => setForm({ ...form, groom_family: true, bride_family: false, friend: false, coworker: false })} className="size-4 accent-[#a04d34]" />Familia del novio</label><label className="flex min-h-11 items-center gap-2 border border-[#24332e]/15 px-3 text-sm"><input type="radio" name="relationship" checked={form.bride_family} onChange={() => setForm({ ...form, groom_family: false, bride_family: true, friend: false, coworker: false })} className="size-4 accent-[#a04d34]" />Familia de la novia</label><label className="flex min-h-11 items-center gap-2 border border-[#24332e]/15 px-3 text-sm"><input type="radio" name="relationship" checked={form.friend} onChange={() => setForm({ ...form, groom_family: false, bride_family: false, friend: true, coworker: false })} className="size-4 accent-[#a04d34]" />Amigo/a</label><label className="flex min-h-11 items-center gap-2 border border-[#24332e]/15 px-3 text-sm"><input type="radio" name="relationship" checked={form.coworker} onChange={() => setForm({ ...form, groom_family: false, bride_family: false, friend: false, coworker: true })} className="size-4 accent-[#a04d34]" />Compañero de trabajo</label></div></fieldset>
               <label className="sm:col-span-2 text-sm font-medium">Observación interna<textarea value={form.internal_observation} onChange={(event) => setForm({ ...form, internal_observation: event.target.value })} rows={3} className="mt-2 w-full rounded-lg border border-[#24332e]/20 bg-[#fbfaf6] transition-colors focus:bg-white p-3 outline-none focus:border-[#a04d34]" /></label>
               {editingGuest && <label className="sm:col-span-2 flex min-h-11 items-center gap-3 border border-[#24332e]/15 px-3 text-sm"><input type="checkbox" checked={form.invitation_sent} onChange={(event) => setForm({ ...form, invitation_sent: event.target.checked })} className="size-4 accent-[#a04d34]" />Invitación enviada</label>}
             </div>

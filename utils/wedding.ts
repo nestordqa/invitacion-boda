@@ -13,7 +13,7 @@ export const WEDDINGS: Record<WeddingSlug, WeddingConfig> = {
     slug: "nestor-valentina",
     coupleNames: "Néstor & Valentina",
     invitationPath: "/v2",
-    rsvpDeadline: new Date("2026-10-15T23:59:59-04:00"),
+    rsvpDeadline: new Date("2026-11-30T23:59:59-04:00"),
     maxConfirmedGuests: 130,
   },
   "gabriel-vanessa": {

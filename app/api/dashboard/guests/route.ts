@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
   const page = Math.max(1, Number(request.nextUrl.searchParams.get("page")) || 1);
   const requestedPageSize = Number(request.nextUrl.searchParams.get("pageSize"));
   const pageSize = PAGE_SIZES.includes(requestedPageSize) ? requestedPageSize : 20;
-  const relationships = request.nextUrl.searchParams.getAll("relationship").filter((value) => ["groom_family", "bride_family", "friend"].includes(value));
+  const relationships = request.nextUrl.searchParams.getAll("relationship").filter((value) => ["groom_family", "bride_family", "friend", "coworker"].includes(value));
   const status = request.nextUrl.searchParams.get("status");
   const sent = request.nextUrl.searchParams.get("sent");
   const search = request.nextUrl.searchParams.get("search")?.trim() ?? "";
@@ -29,7 +29,7 @@ export async function GET(request: NextRequest) {
 
   const guestsQuery = supabase
     .from("guests")
-    .select("id, family, name, groom_family, bride_family, friend, confirmation, passes_number, used_passes_confirmed, guest_observation, internal_observation, invitation_token, invitation_url, invitation_sent, unlikely_to_attend, is_abroad, created_at", { count: "exact" })
+    .select("id, family, name, groom_family, bride_family, friend, coworker, confirmation, passes_number, used_passes_confirmed, guest_observation, internal_observation, invitation_token, invitation_url, invitation_sent, unlikely_to_attend, is_abroad, created_at", { count: "exact" })
     .order("created_at", { ascending: false })
     .range(start, start + pageSize - 1);
   const { data, error, count } = await applyFilters(guestsQuery, { relationships, status, sent, search });
@@ -40,7 +40,7 @@ export async function GET(request: NextRequest) {
 
   const summaryQuery = supabase
     .from("guests")
-    .select("groom_family, bride_family, friend, confirmation, passes_number, used_passes_confirmed, unlikely_to_attend");
+    .select("groom_family, bride_family, friend, coworker, confirmation, passes_number, used_passes_confirmed, unlikely_to_attend");
   const { data: summaryRows, error: summaryError } = await applyFilters(summaryQuery, { relationships, status, sent, search });
 
   if (summaryError) {
@@ -57,12 +57,13 @@ export async function GET(request: NextRequest) {
     if (guest.groom_family) totals.groomFamilyPasses += guest.passes_number;
     if (guest.bride_family) totals.brideFamilyPasses += guest.passes_number;
     if (guest.friend) totals.friendPasses += guest.passes_number;
+    if (guest.coworker) totals.coworkerPasses += guest.passes_number;
     if (guest.confirmation === "confirmed") totals.confirmedPasses += confirmedPasses;
     if (guest.confirmation === "pending") totals.pendingPasses += guest.passes_number;
     if (guest.confirmation === "pending" && !guest.unlikely_to_attend) totals.expectedPendingPasses += guest.passes_number;
     if (guest.confirmation === "declined") totals.declinedPasses += guest.passes_number;
     return totals;
-  }, { totalPasses: 0, groomFamilyPasses: 0, brideFamilyPasses: 0, friendPasses: 0, confirmedPasses: 0, pendingPasses: 0, expectedPendingPasses: 0, declinedPasses: 0, unlikelyGuests: 0, unlikelyPasses: 0 });
+  }, { totalPasses: 0, groomFamilyPasses: 0, brideFamilyPasses: 0, friendPasses: 0, coworkerPasses: 0, confirmedPasses: 0, pendingPasses: 0, expectedPendingPasses: 0, declinedPasses: 0, unlikelyGuests: 0, unlikelyPasses: 0 });
 
   return Response.json({ guests: data, page, pageSize, total: count ?? 0, summary });
 }
@@ -105,6 +106,7 @@ export async function POST(request: NextRequest) {
       groom_family: Boolean(body.groom_family),
       bride_family: Boolean(body.bride_family),
       friend: Boolean(body.friend),
+      coworker: Boolean(body.coworker),
       confirmation: "pending",
       passes_number: passesNumber,
       used_passes_confirmed: 0,
